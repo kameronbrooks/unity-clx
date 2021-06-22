@@ -65,6 +65,7 @@ namespace CLX
         }
         public TokenType type;
         public string text;
+        public int lineNumber;
 
         public Token(string text, TokenType type)
         {
@@ -145,7 +146,6 @@ namespace CLX
                 }
                 else if (Char.IsLetterOrDigit(cur) || cur == '_')
                 {
-                    Console.Write(cur);
                     string identifier = GetString();
                     Token token = GetKeywordToken(identifier);
                     if (token != null)
@@ -159,7 +159,7 @@ namespace CLX
                 }
                 else if (cur == '\n')
                 {
-                    _lineNumber += 1;
+                    ++_lineNumber;
                     Step();
                 }
                 else
@@ -191,12 +191,14 @@ namespace CLX
         private Token CreateToken(Token.TokenType type, string text)
         {
             Token token = new Token(text, type);
+            token.lineNumber = _lineNumber;
             return token;
         }
 
         private Token CreateToken(Token.TokenType type, params char[] chars)
         {
             Token token = new Token(new string(chars), type);
+            token.lineNumber = _lineNumber;
             return token;
         }
 
@@ -560,6 +562,7 @@ namespace CLX
             while (!isEOF && Step() != '\n')
             {
             }
+            ++_lineNumber;
             return;
         }
 
