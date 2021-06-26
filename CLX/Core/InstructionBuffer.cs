@@ -32,7 +32,6 @@ namespace CLX
                 if (previous == null) return this;
                 else return previous.GetHead();
             }
-
             /// <summary>
             /// Insert a node after this node
             /// </summary>
@@ -63,7 +62,6 @@ namespace CLX
 
         Node _root;
         Node _tail;
-
         /// <summary>
         /// Count the nodes from head to tail
         /// </summary>
@@ -79,7 +77,6 @@ namespace CLX
             }
             return i;
         }
-
         /// <summary>
         /// Update the indices of every node
         /// </summary>
@@ -154,7 +151,6 @@ namespace CLX
 
             }
         }
-
         /// <summary>
         /// Make sure that head and tail are correct
         /// </summary>
@@ -169,7 +165,6 @@ namespace CLX
                 _root = _root.previous;
             }
         }
-
         /// <summary>
         /// Export as array
         /// </summary>

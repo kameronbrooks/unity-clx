@@ -13,12 +13,14 @@ namespace CLX
         int _tokenCount;
         Program _program;
         Type _targetType;
+        InstructionBuffer _instBuffer;
 
         public Program Compile(string script, Type targetType)
         {
             _program = new Program();
             _targetType = targetType;
             Lexer lexer = new Lexer();
+            _instBuffer = new InstructionBuffer();
             try
             {
                 _tokens = lexer.Tokenize(script);
@@ -38,12 +40,19 @@ namespace CLX
             catch(Exception e)
             {
                 Debug.LogError("CLX Failed to compile: " + e.Message);
+                return null;
             }
-            
+
+            _instBuffer.Add(new Instruction(OpCode.Term));
+            // add the instructions to the program
+            _program.instructions = _instBuffer.BakeAndExport();
 
             return _program;
         }
-
+        /// <summary>
+        /// Is end of file
+        /// </summary>
+        /// <returns></returns>
         private bool IsEOF()
         {
             return (_index >= _tokenCount);
@@ -68,6 +77,11 @@ namespace CLX
             }
         }
 
+        /// <summary>
+        /// Look ahead to see if the next token matches one of the provided types
+        /// </summary>
+        /// <param name="types"></param>
+        /// <returns></returns>
         private bool LookAhead(params Token.TokenType[] types)
         {
             for (int i = 0; i < types.Length; i += 1)
@@ -190,7 +204,10 @@ namespace CLX
             return null;
         }
 
-
+        /// <summary>
+        /// Compile Statement
+        /// Root of the recursive compilation tree
+        /// </summary>
         private void CompileStatement()
         {
             if      (Compile_If())      { }

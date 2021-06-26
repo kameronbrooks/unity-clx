@@ -286,39 +286,28 @@ namespace CLX
             {
                 case '{':
                     return CreateToken(Token.TokenType.CurlyBracketOpen, cur);
-
                 case '}':
                     return CreateToken(Token.TokenType.CurlyBracketClose, cur);
-
                 case '[':
                     return CreateToken(Token.TokenType.SquareBracketOpen, cur);
-
                 case ']':
                     return CreateToken(Token.TokenType.SquareBracketClose, cur);
-
                 case '(':
-
                     return CreateToken(Token.TokenType.ParenthOpen, cur);
-
                 case ')':
                     return CreateToken(Token.TokenType.ParenthClose, cur);
-
                 case '.':
                     if (Peek() == '.')
                     {
                         return CreateToken(Token.TokenType.Interp, cur, Step());
                     }
                     return CreateToken(Token.TokenType.Dot, cur);
-
                 case ',':
                     return CreateToken(Token.TokenType.Comma, cur);
-
                 case '%':
                     return CreateToken(Token.TokenType.Modulo, cur);
-
                 case ';':
                     return CreateToken(Token.TokenType.EOS, cur);
-
                 case '-':
                     if (Peek() == '=')
                     {
@@ -567,7 +556,7 @@ namespace CLX
         }
 
         /// <summary>
-        /// 
+        /// Return current char and move to next
         /// </summary>
         /// <returns></returns>
         private char Step()
@@ -575,7 +564,11 @@ namespace CLX
             char output = _input[_index++];
             return output;
         }
-
+        /// <summary>
+        /// Return (count) characters and move to next
+        /// </summary>
+        /// <param name="count"></param>
+        /// <returns></returns>
         private string Step(int count)
         {
             string output = "";
@@ -585,7 +578,9 @@ namespace CLX
             }
             return output;
         }
-
+        /// <summary>
+        /// Move back one char
+        /// </summary>
         private void StepBack()
         {
             if (_index > 0)

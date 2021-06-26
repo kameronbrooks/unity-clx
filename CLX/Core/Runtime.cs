@@ -6,10 +6,10 @@ namespace CLX
 {
     public unsafe struct Thread
     {
-        const int SIZE_BYTE = sizeof(byte);
-        const int SIZE_INT16 = sizeof(short);
-        const int SIZE_INT32 = sizeof(int);
-        const int SIZE_INT64 = sizeof(long);
+        const int SIZE_BYTE =       sizeof(byte);
+        const int SIZE_INT16 =      sizeof(short);
+        const int SIZE_INT32 =      sizeof(int);
+        const int SIZE_INT64 =      sizeof(long);
         const int STACK_SHIFT_INT32_COMPARISON = sizeof(int) * 2 - 1;
 
 
