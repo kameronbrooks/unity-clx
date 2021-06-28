@@ -151,6 +151,26 @@ namespace CLX
 
             }
         }
+        public Node Add(OpCode op)
+        {
+            return Add(new Instruction(op));
+        }
+        public Node Add(OpCode op, bool val)
+        {
+            return Add(new Instruction(op, val));
+        }
+        public Node Add(OpCode op, byte val)
+        {
+            return Add(new Instruction(op, val));
+        }
+        public Node Add(OpCode op, short val)
+        {
+            return Add(new Instruction(op, val));
+        }
+        public Node Add(OpCode op, int val)
+        {
+            return Add(new Instruction(op, val));
+        }
         /// <summary>
         /// Make sure that head and tail are correct
         /// </summary>

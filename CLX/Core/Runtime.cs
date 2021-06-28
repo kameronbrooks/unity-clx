@@ -60,11 +60,91 @@ namespace CLX
                                 case OpCode.Jump:
                                     ip = instructions + *(int*)ip->data;                                   
                                     break;
+                                /* =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= */
+                                /* =-=-=-=-=-=-=-=-=-= Branches =-=-=-=-=-=-=-=-=-=-=    */
+                                /* =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= */
                                 case OpCode.BrchFalse:
                                     ip = (*((bool*)sp++)) ? instructions + *(int*)ip->data : ip + 1;
                                     break;
                                 case OpCode.BrchTrue:
                                     ip = (*((bool*)sp++)) ? ip + 1 : instructions + *(int*)ip->data;
+                                    break;
+
+                                /* =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= */
+                                /* =-=-=-=-=-=-=-=-=-=    Logic    =-=-=-=-=-=-=-=-=-=-= */
+                                /* =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= */
+                                case OpCode.And_i8:
+                                    (*((bool*)sp++)) = (*((bool*)sp + 1)) && (*((bool*)sp));
+                                    ++ip;
+                                    break;
+                                case OpCode.Or_i8:
+                                    (*((bool*)sp++)) = (*((bool*)sp + 1)) || (*((bool*)sp));
+                                    ++ip;
+                                    break;
+                                case OpCode.Not_i8:
+                                    (*((bool*)sp)) = !(*((bool*)sp));
+                                    ++ip;
+                                    break;
+
+                                /* =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= */
+                                /* =-=-=-=-=-=-=-=-=-= Comparison  =-=-=-=-=-=-=-=-=-=-= */
+                                /* =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= */
+                                case OpCode.Eq_i32:
+                                    *((bool*)(sp += STACK_SHIFT_INT32_COMPARISON)) = *((int*)(sp + SIZE_INT32)) == *((int*)(sp));
+                                    ++ip;
+                                    break;
+                                case OpCode.NEq_i32:
+                                    *((bool*)(sp += STACK_SHIFT_INT32_COMPARISON)) = *((int*)(sp + SIZE_INT32)) != *((int*)(sp));
+                                    ++ip;
+                                    break;
+                                case OpCode.LT_i32:
+                                    *((bool*)(sp += STACK_SHIFT_INT32_COMPARISON)) = *((int*)(sp + SIZE_INT32)) < *((int*)(sp));
+                                    ++ip;
+                                    break;
+                                case OpCode.GT_i32:
+                                    *((bool*)(sp += STACK_SHIFT_INT32_COMPARISON)) = *((int*)(sp + SIZE_INT32)) > *((int*)(sp));
+                                    ++ip;
+                                    break;
+                                case OpCode.LTEq_i32:
+                                    *((bool*)(sp += STACK_SHIFT_INT32_COMPARISON)) = *((int*)(sp + SIZE_INT32)) <= *((int*)(sp));
+                                    ++ip;
+                                    break;
+                                case OpCode.GTEq_i32:
+                                    *((bool*)(sp += STACK_SHIFT_INT32_COMPARISON)) = *((int*)(sp + SIZE_INT32)) >= *((int*)(sp));
+                                    ++ip;
+                                    break;
+                                /* =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= */
+                                /* =-=-=-=-=-=-=-=-=-= Stack Manip =-=-=-=-=-=-=-=-=-=-= */
+                                /* =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= */
+                                case OpCode.LdC_i8:
+                                    *((byte*)(sp--)) = *(byte*)ip->data;
+                                    ++ip;
+                                    break;
+                                case OpCode.LdC_i32:
+                                    *((int*)(sp -= SIZE_INT32)) = *(int*)ip->data;
+                                    ++ip;
+                                    break;
+                                case OpCode.AllocLoc:
+                                    sp -= *(int*)ip->data;
+                                    ++ip;
+                                    break;
+                                case OpCode.LdArg_i32:
+                                    *((int*)(sp -= SIZE_INT32)) = *(int*)(fp + (*(int*)ip->data));
+                                    ++ip;
+                                    break;
+                                case OpCode.LdArg_i8:
+                                    *((byte*)(sp--)) = *(byte*)(fp + (*(int*)ip->data));
+                                    ++ip;
+                                    break;
+                                case OpCode.StArg_i32:
+                                    *(int*)(fp + (*(int*)ip->data)) = *((int*)(sp));
+                                    sp += SIZE_INT32;
+                                    ++ip;
+                                    break;
+                                case OpCode.StArg_i8:
+                                    *(byte*)(fp + (*(int*)ip->data)) = *((byte*)(sp));
+                                    ++sp;
+                                    ++ip;
                                     break;
                                 case OpCode.PushFrame:
                                     // push return instruction
@@ -79,6 +159,91 @@ namespace CLX
                                     // pop instruction pointer
                                     ip = *((Instruction**)(sp += SIZE_INT64));
                                     sp += SIZE_INT64;
+                                    break;
+                                /* =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= */
+                                /* =-=-=-=-=-=-=-=-=-= Arithmetic  =-=-=-=-=-=-=-=-=-=-= */
+                                /* =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= */
+                                case OpCode.Neg_i32:
+                                    *((int*)(sp)) *= -1;
+                                    ++ip;
+                                    break;
+                                case OpCode.Neg_f32:
+                                    *((float*)(sp)) *= -1;
+                                    ++ip;
+                                    break;
+                                case OpCode.Add_i32:
+                                    *((int*)(sp + SIZE_INT32)) += *((int*)(sp));
+                                    sp += SIZE_INT32;
+                                    ++ip;
+                                    break;
+                                case OpCode.Add_f32:
+                                    *((float*)(sp + SIZE_INT32)) += *((float*)(sp));
+                                    sp += SIZE_INT32;
+                                    ++ip;
+                                    break;
+                                case OpCode.Sub_i32:
+                                    *((int*)(sp + SIZE_INT32)) -= *((int*)(sp));
+                                    sp += SIZE_INT32;
+                                    ++ip;
+                                    break;
+                                case OpCode.Sub_f32:
+                                    *((float*)(sp + SIZE_INT32)) -= *((float*)(sp));
+                                    sp += SIZE_INT32;
+                                    ++ip;
+                                    break;
+                                case OpCode.Mul_i32:
+                                    *((int*)(sp + SIZE_INT32)) *= *((int*)(sp));
+                                    sp += SIZE_INT32;
+                                    ++ip;
+                                    break;
+                                case OpCode.Mul_f32:
+                                    *((float*)(sp + SIZE_INT32)) *= *((float*)(sp));
+                                    sp += SIZE_INT32;
+                                    ++ip;
+                                    break;
+                                case OpCode.Div_i32:
+                                    *((int*)(sp + SIZE_INT32)) /= *((int*)(sp));
+                                    sp += SIZE_INT32;
+                                    ++ip;
+                                    break;
+                                case OpCode.Div_f32:
+                                    *((float*)(sp + SIZE_INT32)) /= *((float*)(sp));
+                                    sp += SIZE_INT32;
+                                    ++ip;
+                                    break;
+                                case OpCode.Mod_i32:
+                                    *((int*)(sp + SIZE_INT32)) %= *((int*)(sp));
+                                    sp += SIZE_INT32;
+                                    ++ip;
+                                    break;
+                                case OpCode.Mod_f32:
+                                    *((float*)(sp + SIZE_INT32)) %= *((float*)(sp));
+                                    sp += SIZE_INT32;
+                                    ++ip;
+                                    break;
+                                case OpCode.Pow_f32:
+                                    *((float*)(sp + SIZE_INT32)) = Mathf.Pow(*((float*)(sp + SIZE_INT32)) ,* ((float*)(sp)));
+                                    sp += SIZE_INT32;
+                                    ++ip;
+                                    break;
+                                case OpCode.Inc_i32:
+                                    ++*((int*)(sp));
+                                    ++ip;
+                                    break;
+                                case OpCode.Dec_i32:
+                                    --*((int*)(sp));
+                                    ++ip;
+                                    break;
+                                /* =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= */
+                                /* =-=-=-=-=-=-=-=-=-= Arithmetic  =-=-=-=-=-=-=-=-=-=-= */
+                                /* =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= */
+                                case OpCode.Prnt_bool:
+                                    Debug.Log(*((bool*)(sp)) ? "true" : "false");
+                                    ++ip;
+                                    break;
+                                case OpCode.Prnt_i32:
+                                    Debug.Log(*((int*)(sp)));
+                                    ++ip;
                                     break;
                                 case OpCode.Term:
                                     continueLoop = false;

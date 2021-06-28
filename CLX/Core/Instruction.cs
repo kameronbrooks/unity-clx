@@ -30,6 +30,15 @@ namespace CLX
         PushFrame,
         PopFrame,
 
+        /* =-=-= Comparison =-=-= */
+        Eq_i8, Eq_i32, Eq_f32,
+        NEq_i8, NEq_i32, NEq_f32,
+        LT_i32, LT_f32,
+        GT_i32, GT_f32,
+        LTEq_i32, LTEq_f32,
+        GTEq_i32, GTEq_f32,
+
+
         /* =-=-= Logic =-=-= */
         And_i8,
         Or_i8,
@@ -41,9 +50,15 @@ namespace CLX
         Sub_i32, Sub_f32,
         Mul_i32, Mul_f32,
         Div_i32, Div_f32,
-        Pow_i32, Pow_f32,
-        Mod_i32, Mod_f32
+        Pow_f32,
+        Mod_i32, Mod_f32,
+        Inc_i32,
+        Dec_i32,
 
+        /* =-=-= Print =-=-= */
+        Prnt_bool,
+        Prnt_i32,
+        Prnt_f32
 
     }
     public unsafe struct Instruction

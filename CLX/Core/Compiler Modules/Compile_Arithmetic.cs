@@ -18,5 +18,14 @@ namespace CLX
         {
 
         }
+        public void Compile_Unary()
+        {
+
+        }
+
+        public void Complie_PreUnary()
+        {
+
+        }
     }
 }
