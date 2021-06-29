@@ -8,12 +8,18 @@ namespace CLX
 {
     public partial class Compiler
     {
+        public struct State
+        {
+            public Datatype currentDatatype;
+        }
         Token[] _tokens;
         int _index;
         int _tokenCount;
         Program _program;
         Type _targetType;
         InstructionBuffer _instBuffer;
+        Assembly _assembly;
+        State _state;
 
         public Program Compile(string script, Type targetType)
         {
@@ -21,6 +27,8 @@ namespace CLX
             _targetType = targetType;
             Lexer lexer = new Lexer();
             _instBuffer = new InstructionBuffer();
+            _assembly = new Assembly();
+            _state = new State();
             try
             {
                 _tokens = lexer.Tokenize(script);

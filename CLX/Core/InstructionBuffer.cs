@@ -171,6 +171,10 @@ namespace CLX
         {
             return Add(new Instruction(op, val));
         }
+        public Node Add(OpCode op, float val)
+        {
+            return Add(new Instruction(op, val));
+        }
         /// <summary>
         /// Make sure that head and tail are correct
         /// </summary>

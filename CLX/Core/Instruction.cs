@@ -103,6 +103,18 @@ namespace CLX
 
             }
         }
+        public Instruction(OpCode op, float val)
+        {
+            unsafe
+            {
+                fixed (byte* bdata = this.data)
+                {
+                    opCode = op;
+                    *(float*)(bdata) = val;
+                }
+
+            }
+        }
         public Instruction(OpCode op, short val)
         {
             unsafe
