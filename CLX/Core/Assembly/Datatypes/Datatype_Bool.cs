@@ -21,7 +21,7 @@ namespace CLX
             return this;
         }
 
-        public override Datatype GetLoadInstructions(ref InstructionBuffer buffer, Compiler.State.Reference.RefType refType)
+        public override Datatype GetLoadInstructions(ref InstructionBuffer buffer, Compiler.State.Reference reference)
         {
             return this;
         }
@@ -36,7 +36,7 @@ namespace CLX
             return this;
         }
 
-        public override Datatype GetStoreInstructions(ref InstructionBuffer buffer, Compiler.State.Reference.RefType refType)
+        public override Datatype GetStoreInstructions(ref InstructionBuffer buffer, Compiler.State.Reference reference)
         {
             return this;
         }

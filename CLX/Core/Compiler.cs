@@ -38,6 +38,8 @@ namespace CLX
             }
             Stack<Substate> _frames;
 
+            
+
             public Datatype currentDatatype
             {
                 get
@@ -49,6 +51,7 @@ namespace CLX
                     _frames.Peek().currentDatatype = value;
                 }
             }
+            public Reference currentLRReference;
 
             /// <summary>
             /// Does the state have an open reference that can become either l/r?
@@ -92,6 +95,12 @@ namespace CLX
         InstructionBuffer _ibuffer;
         Assembly _assembly;
         State _state;
+
+        public Compiler()
+        {
+            BuildCompilationChain();
+        }
+        
 
         public Program Compile(string script, Type targetType)
         {
@@ -302,5 +311,6 @@ namespace CLX
                 Require(Token.TokenType.EOS, "; Required");
             }
         }
+
     }
 }

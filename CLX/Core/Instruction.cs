@@ -27,6 +27,9 @@ namespace CLX
         LdArg_i8, LdArg_i32,
         StArg_i8, StArg_i32,
 
+        LdLoc_i8, LdLoc_i32,
+        StLoc_i8, StLoc_i32,
+
         AllocLoc,
         PushFrame,
         PopFrame,

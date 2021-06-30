@@ -68,7 +68,7 @@ namespace CLX
             return this;
         }
 
-        public override Datatype GetLoadInstructions(ref InstructionBuffer buffer, Compiler.State.Reference.RefType refType)
+        public override Datatype GetLoadInstructions(ref InstructionBuffer buffer, Compiler.State.Reference reference)
         {
             return this;
         }
@@ -93,7 +93,7 @@ namespace CLX
             throw new System.Exception($"The operation {opType.ToString()} is unsupported for {this.fullyQualifiedName} ");
         }
 
-        public override Datatype GetStoreInstructions(ref InstructionBuffer buffer, Compiler.State.Reference.RefType refType)
+        public override Datatype GetStoreInstructions(ref InstructionBuffer buffer, Compiler.State.Reference reference)
         {
             return this;
         }

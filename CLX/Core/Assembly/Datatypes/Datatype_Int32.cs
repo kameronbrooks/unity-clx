@@ -64,8 +64,21 @@ namespace CLX
             throw new System.NotImplementedException();
         }
 
-        public override Datatype GetLoadInstructions(ref InstructionBuffer buffer, Compiler.State.Reference.RefType refType)
+        public override Datatype GetLoadInstructions(ref InstructionBuffer buffer, Compiler.State.Reference reference)
         {
+            switch (reference.reftype)
+            {
+                case Compiler.State.Reference.RefType.Local:
+                    buffer.Add(OpCode.LdLoc_i32, reference.offset);
+                    break;
+                case Compiler.State.Reference.RefType.Arg:
+                    buffer.Add(OpCode.LdArg_i32, reference.offset);
+                    break;
+                case Compiler.State.Reference.RefType.Reg:
+                    break;
+                default:
+                    throw new System.Exception($"The storage type is not supported by this data type({_name})");
+            }
             return this;
         }
 
@@ -89,8 +102,21 @@ namespace CLX
             throw new System.Exception($"The operation {opType.ToString()} is unsupported for {this.fullyQualifiedName} ");
         }
 
-        public override Datatype GetStoreInstructions(ref InstructionBuffer buffer, Compiler.State.Reference.RefType refType)
+        public override Datatype GetStoreInstructions(ref InstructionBuffer buffer, Compiler.State.Reference reference)
         {
+            switch(reference.reftype)
+            {
+                case Compiler.State.Reference.RefType.Local:
+                    buffer.Add(OpCode.StLoc_i32, reference.offset);
+                    break;
+                case Compiler.State.Reference.RefType.Arg:
+                    buffer.Add(OpCode.StArg_i32, reference.offset);
+                    break;
+                case Compiler.State.Reference.RefType.Reg:
+                    break;
+                default:
+                    throw new System.Exception($"The storage type is not supported by this data type({_name})");
+            }
             return this;
         }
 
