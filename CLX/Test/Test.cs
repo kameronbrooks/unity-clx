@@ -3,12 +3,15 @@ using System.Collections.Generic;
 using UnityEngine;
 using CLX;
 
+[ExecuteInEditMode]
 public class Test : MonoBehaviour
 {
+    [Multiline] 
+    public string script;
+    public string output;
     // Start is called before the first frame update
     void Start()
     {
-        RunTest1();
 
         
     }
@@ -21,7 +24,7 @@ public class Test : MonoBehaviour
         InstructionBuffer buffer = new InstructionBuffer();
 
         Compiler compiler = new Compiler();
-        Program prog = compiler.Compile("1+1*2;", null);
+        Program prog = compiler.Compile(script, null);
         Debug.Log(prog.ToString());
         Thread thread = new Thread(512);
         //thread.Execute(prog, null);
