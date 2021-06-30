@@ -59,6 +59,9 @@ namespace CLX
         Inc_i32,
         Dec_i32,
 
+        /* =-=-= Conv =-=-= */
+        Conv_i32_f32,
+
         /* =-=-= Print =-=-= */
         Prnt_bool,
         Prnt_i32,

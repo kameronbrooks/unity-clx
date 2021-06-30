@@ -53,6 +53,52 @@ namespace CLX
                         return this;
                     }
                     break;
+                case Token.TokenType.Equals:
+                    if (rtype == this)
+                    {
+                        buffer.Add(OpCode.Eq_i32);
+                        return this;
+                    }
+                    break;
+                case Token.TokenType.NotEquals:
+                    if (rtype == this)
+                    {
+                        buffer.Add(OpCode.NEq_i32);
+                        return this;
+                    }
+                    break;
+                case Token.TokenType.GreaterThan:
+                    if (rtype == this)
+                    {
+                        buffer.Add(OpCode.GT_i32);
+
+                        return this;
+                    }
+                    break;
+                case Token.TokenType.LessThan:
+                    if (rtype == this)
+                    {
+                        buffer.Add(OpCode.LT_i32);
+
+                        return this;
+                    }
+                    break;
+                case Token.TokenType.GreaterThanOrEqual:
+                    if (rtype == this)
+                    {
+                        buffer.Add(OpCode.GTEq_i32);
+
+                        return this;
+                    }
+                    break;
+                case Token.TokenType.LessThanOrEqual:
+                    if (rtype == this)
+                    {
+                        buffer.Add(OpCode.LTEq_i32);
+
+                        return this;
+                    }
+                    break;
                 default:
                     break;
             }
@@ -61,7 +107,14 @@ namespace CLX
 
         public override Datatype GetConvertInstructions(ref InstructionBuffer buffer, Datatype target)
         {
-            throw new System.NotImplementedException();
+            switch(target.id)
+            {
+                case Datatype.TYPEID_FLOAT:
+                    buffer.Add(OpCode.Conv_i32_f32);
+                    return target;
+                default:
+                    throw new System.Exception($"Cannot cast {this.fullyQualifiedName} to {target.fullyQualifiedName}");
+            }
         }
 
         public override Datatype GetLoadInstructions(ref InstructionBuffer buffer, Compiler.State.Reference reference)
@@ -124,7 +177,10 @@ namespace CLX
         {
             if(rtype.id == Datatype.TYPEID_FLOAT)
             {
-                // TODO: add conversion step
+                insertionNode.InsertAfter(new InstructionBuffer.Node
+                {
+                    instruction = new Instruction(OpCode.Conv_i32_f32)
+                });
             }
         }
     }
