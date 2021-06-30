@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace CLX
 {
-    public class Datatype : IAssemblyElement
+    public abstract class Datatype : IAssemblyElement
     {
         public const int TYPEID_BOOL = 1;
         public const int TYPEID_INT = 4;
@@ -17,11 +17,11 @@ namespace CLX
         /// <summary>
         /// Name of the type
         /// </summary>
-        string _name;
+        protected string _name;
         /// <summary>
         /// Unique id for the type
         /// </summary>
-        int _id;
+        protected int _id;
         /// <summary>
         /// How large is this on the stack
         /// </summary>
@@ -29,8 +29,16 @@ namespace CLX
         /// <summary>
         /// Fully qualified name
         /// </summary>
-        string _fullyQualifiedName;
+        protected string _fullyQualifiedName;
 
+        public readonly Assembly assembly;
+
+        public Datatype(Assembly asm)
+        {
+            assembly = asm;
+            _name = "";
+            _id = -1;
+        }
         public Datatype(string name, int id)
         {
             _name = name;
@@ -64,5 +72,19 @@ namespace CLX
                 _fullyQualifiedName = $"{_parentNamespace.fullyQualifiedName}.{_name}";
             }
         }
+
+
+        public abstract Datatype GetPreUnaryInstructions(Token.TokenType opType, ref InstructionBuffer buffer);
+        public abstract Datatype GetPostUnaryInstructions(Token.TokenType opType, ref InstructionBuffer buffer);
+        public abstract Datatype GetBinaryOpInstructions(Token.TokenType opType, Datatype rtype, ref InstructionBuffer buffer);
+        public abstract Datatype GetStoreInstructions(ref InstructionBuffer buffer, Compiler.State.Reference.RefType refType);
+        public abstract Datatype GetLoadInstructions(ref InstructionBuffer buffer, Compiler.State.Reference.RefType refType);
+        public abstract Datatype GetConvertInstructions(ref InstructionBuffer buffer, Datatype target);
+
+        public virtual void ApplyTypePrecedence(Datatype rtype, InstructionBuffer.Node insertionNode)
+        {
+
+        }
+
     }
 }

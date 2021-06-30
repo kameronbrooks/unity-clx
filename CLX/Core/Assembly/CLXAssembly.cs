@@ -181,17 +181,17 @@ namespace CLX
             _global = new Namespace("__global__");
             datatypes = new Datatypes();
 
-            datatypes.BOOL = new Datatype("bool", Datatype.TYPEID_BOOL);
-            datatypes.INT32 = new Datatype("int32", Datatype.TYPEID_INT);
-            datatypes.FLOAT32 = new Datatype("float32", Datatype.TYPEID_FLOAT);
-            datatypes.STRING = new Datatype("string", Datatype.TYPEID_STRING);
-            datatypes.STRING = new Datatype("dict", Datatype.TYPEID_DICTIONARY);
+            datatypes.BOOL = new Datatype_Bool(this);
+            datatypes.INT32 = new Datatype_Int32(this);
+            datatypes.FLOAT32 = new Datatype_Float32(this);
+            //datatypes.STRING = new Datatype("string", Datatype.TYPEID_STRING);
+            //datatypes.STRING = new Datatype("dict", Datatype.TYPEID_DICTIONARY);
 
             _global.AddDatatype(datatypes.BOOL);
             _global.AddDatatype(datatypes.INT32);
             _global.AddDatatype(datatypes.FLOAT32);
-            _global.AddDatatype(datatypes.STRING);
-            _global.AddDatatype(datatypes.DICTIONARY);
+            //_global.AddDatatype(datatypes.STRING);
+            //_global.AddDatatype(datatypes.DICTIONARY);
         }
         Namespace _global;
         public Datatypes datatypes;

@@ -8,27 +8,28 @@ namespace CLX
     {
         public bool Compile_If()
         {
-            return true;
+            return false;
         }
         public bool Compile_For()
         {
-            return true;
+            return false;
         }
         public bool Compile_While()
         {
-            return true;
+            return false;
         }
         public bool Compile_Foreach()
         {
-            return true;
+            return false;
         }
         public bool Compile_Block()
         {
-            return true;
+            return false;
         }
         public void Compile_Expression()
         {
-
+            Debug.Log("**Expression:" + Peek());
+            Compile_AddSub();
         }
 
     }

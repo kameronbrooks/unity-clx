@@ -72,6 +72,10 @@ namespace CLX
             this.text = text;
             this.type = type;
         }
+        public override string ToString()
+        {
+            return $"{text}[{type.ToString()}]";
+        }
     }
     public class Lexer
     {

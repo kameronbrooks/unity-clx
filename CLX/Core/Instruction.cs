@@ -6,7 +6,8 @@ namespace CLX
 {
     public enum OpCode : short
     {
-        Term = 0,
+        NoOp = 0,
+        Term,
         Jump,
 
         /* =-=-= Branches =-=-= */

@@ -20,18 +20,11 @@ public class Test : MonoBehaviour
 
         InstructionBuffer buffer = new InstructionBuffer();
 
-        buffer.Add(OpCode.LdC_i32, 10);
-        buffer.Add(OpCode.LdC_i32, 15);
-        buffer.Add(OpCode.Add_i32);
-        buffer.Add(OpCode.Prnt_i32);
-        buffer.Add(OpCode.Term);
-
-
-        Program prog = new Program();
-        prog.instructions = buffer.BakeAndExport();
-        prog.minStackSize = 512;
+        Compiler compiler = new Compiler();
+        Program prog = compiler.Compile("1+1*2;", null);
+        Debug.Log(prog.ToString());
         Thread thread = new Thread(512);
-        thread.Execute(prog, null);
+        //thread.Execute(prog, null);
     }
     // Update is called once per frame
     void Update()

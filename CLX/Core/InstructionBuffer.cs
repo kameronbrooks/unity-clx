@@ -217,6 +217,20 @@ namespace CLX
 
         }
 
+        public Node tail
+        {
+            get
+            {
+                return _tail;
+            }
+        }
+        public Node root
+        {
+            get
+            {
+                return _root;
+            }
+        }
         public override string ToString()
         {
             System.Text.StringBuilder sb = new System.Text.StringBuilder();

@@ -8,16 +8,88 @@ namespace CLX
 {
     public partial class Compiler
     {
-        public struct State
+        public class State
         {
-            public Datatype currentDatatype;
+            public class Reference
+            {
+                public enum RefType { Local, Arg, Reg, Elem }
+                public RefType reftype;
+                public Datatype datatype;
+                public int offset;
+                public int index;
+
+                public bool Close(ref InstructionBuffer buffer)
+                {
+                    return true;
+                }
+            }
+            public class Substate
+            {
+                public Datatype currentDatatype;
+                public Reference lvalueReference;
+
+                public Substate Copy()
+                {
+                    return new Substate
+                    {
+                        currentDatatype = currentDatatype
+                    };
+                }
+            }
+            Stack<Substate> _frames;
+
+            public Datatype currentDatatype
+            {
+                get
+                {
+                    return _frames.Peek().currentDatatype;
+                }
+                set
+                {
+                    _frames.Peek().currentDatatype = value;
+                }
+            }
+
+            /// <summary>
+            /// Does the state have an open reference that can become either l/r?
+            /// </summary>
+            /// <returns></returns>
+            public bool HasLRValueRef()
+            {
+                return _frames.Peek().lvalueReference != null;
+            }
+            /// <summary>
+            /// Turn the saved l/r value into just an r value
+            /// </summary>
+            public void CloseLRValueRef()
+            {
+                _frames.Peek().lvalueReference = null;
+            }
+
+            public State()
+            {
+                _frames = new Stack<Substate>();
+                _frames.Push(new Substate());
+            }
+
+            public void Push()
+            {
+                _frames.Push(_frames.Peek().Copy());
+            }
+            public void Pop()
+            {
+                if (_frames.Count > 1)
+                {
+                    _frames.Pop();
+                }
+            }
         }
         Token[] _tokens;
         int _index;
         int _tokenCount;
         Program _program;
         Type _targetType;
-        InstructionBuffer _instBuffer;
+        InstructionBuffer _ibuffer;
         Assembly _assembly;
         State _state;
 
@@ -26,7 +98,7 @@ namespace CLX
             _program = new Program();
             _targetType = targetType;
             Lexer lexer = new Lexer();
-            _instBuffer = new InstructionBuffer();
+            _ibuffer = new InstructionBuffer();
             _assembly = new Assembly();
             _state = new State();
             try
@@ -51,9 +123,10 @@ namespace CLX
                 return null;
             }
 
-            _instBuffer.Add(new Instruction(OpCode.Term));
+            _ibuffer.Add(new Instruction(OpCode.Term));
             // add the instructions to the program
-            _program.instructions = _instBuffer.BakeAndExport();
+            _program.instructions = _ibuffer.BakeAndExport();
+            Debug.Log(_ibuffer);
 
             return _program;
         }
@@ -124,7 +197,7 @@ namespace CLX
         {
             if (!isAtEnd)
             {
-                if (_tokens[_index].type == type)
+                if (Peek().type == type)
                 {
                     _index += 1;
                     return previous;
@@ -226,6 +299,7 @@ namespace CLX
             else
             {
                 Compile_Expression();
+                Require(Token.TokenType.EOS, "; Required");
             }
         }
     }

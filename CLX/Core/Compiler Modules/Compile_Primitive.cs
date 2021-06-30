@@ -8,19 +8,20 @@ namespace CLX
     {
         public void Compile_Primitive()
         {
-            if(MatchToken(Token.TokenType.ParenthOpen))
+            Debug.Log("Primitive:" + Peek());
+            if (MatchToken(Token.TokenType.ParenthOpen))
             {
                 Compile_Expression();
-                Require(Token.TokenType.ParenthOpen, ") Expected");
+                Require(Token.TokenType.ParenthClose, ") Expected");
             }
             else if(MatchToken(Token.TokenType.True))
             {
-                _instBuffer.Add(OpCode.LdC_i8, true);
+                _ibuffer.Add(OpCode.LdC_i8, true);
                 _state.currentDatatype = _assembly.datatypes.BOOL;
             }
             else if (MatchToken(Token.TokenType.False))
             {
-                _instBuffer.Add(OpCode.LdC_i8, true);
+                _ibuffer.Add(OpCode.LdC_i8, true);
                 _state.currentDatatype = _assembly.datatypes.BOOL;
             }
             else if (MatchToken(Token.TokenType.Numeric))
@@ -33,7 +34,7 @@ namespace CLX
                     {
                         throw new System.Exception($"Failed to parse float from {prev.text}");
                     }
-                    _instBuffer.Add(OpCode.LdC_i32, number);
+                    _ibuffer.Add(OpCode.LdC_i32, number);
                     _state.currentDatatype = _assembly.datatypes.FLOAT32;
                 }
                 else
@@ -43,7 +44,7 @@ namespace CLX
                     {
                         throw new System.Exception($"Failed to parse int from {prev.text}");
                     }
-                    _instBuffer.Add(OpCode.LdC_i32, number);
+                    _ibuffer.Add(OpCode.LdC_i32, number);
                     _state.currentDatatype = _assembly.datatypes.INT32;
                 }
             }
@@ -54,11 +55,12 @@ namespace CLX
         }
         public void Compile_StringLiteral()
         {
-
+            Debug.Log("String Literal:" + Peek());
         }
         public void Compile_Identifier()
         {
-            if(MatchToken(Token.TokenType.Identifier))
+            Debug.Log("Identifier:" + Peek());
+            if (MatchToken(Token.TokenType.Identifier))
             {
 
             }
