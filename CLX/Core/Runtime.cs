@@ -1,3 +1,4 @@
+#define SAFE_LOOP
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -53,8 +54,21 @@ namespace CLX
                         Instruction* ip = instructions;
 
                         bool continueLoop = true;
+#if SAFE_LOOP
+                        int __safety__accum = 1000000;
+#endif
                         while(continueLoop)
                         {
+#if SAFE_LOOP
+                            // Incase we are debugging the engine and want a failsafe to end the thread without freezing the program in the even of an infinite loop
+                            --__safety__accum; 
+                            if (__safety__accum < 0)
+                            {
+                                continueLoop = false;
+                                Debug.LogError("Exceded the saftey count. Potential infinite loop.");
+                            }
+#endif
+                            // Main op code logic
                             switch(ip->opCode)
                             {
                                 case OpCode.Jump:

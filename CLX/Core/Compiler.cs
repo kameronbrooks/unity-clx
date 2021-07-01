@@ -27,6 +27,7 @@ namespace CLX
             {
                 public Datatype currentDatatype;
                 public Reference lvalueReference;
+                public int localVariableBytes;
 
                 public Substate Copy()
                 {
@@ -39,7 +40,9 @@ namespace CLX
             Stack<Substate> _frames;
 
             
-
+            /// <summary>
+            /// The current data type
+            /// </summary>
             public Datatype currentDatatype
             {
                 get
@@ -51,7 +54,34 @@ namespace CLX
                     _frames.Peek().currentDatatype = value;
                 }
             }
-            public Reference currentLRReference;
+            /// <summary>
+            /// The current LR reference (or null if there is not one)
+            /// </summary>
+            public Reference currentLRReference
+            {
+                get
+                {
+                    return _frames.Peek().lvalueReference;
+                }
+                set
+                {
+                    _frames.Peek().lvalueReference = value;
+                }
+            }
+            /// <summary>
+            /// How many bytes are required for local variables in this scope
+            /// </summary>
+            public int localVariableBytes
+            {
+                get
+                {
+                    return _frames.Peek().localVariableBytes;
+                }
+                set
+                {
+                    _frames.Peek().localVariableBytes = value;
+                }
+            }
 
             /// <summary>
             /// Does the state have an open reference that can become either l/r?
@@ -95,6 +125,7 @@ namespace CLX
         InstructionBuffer _ibuffer;
         Assembly _assembly;
         State _state;
+        Scope _globalScope;
 
         public Compiler()
         {
@@ -110,6 +141,7 @@ namespace CLX
             _ibuffer = new InstructionBuffer();
             _assembly = new Assembly();
             _state = new State();
+            _globalScope = new Scope();
             try
             {
                 _tokens = lexer.Tokenize(script);
