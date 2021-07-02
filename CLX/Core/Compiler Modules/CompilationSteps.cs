@@ -368,10 +368,28 @@ namespace CLX
         {
             return false;
         }
-        public bool Compile_Block()
+        public bool Compile_Block(bool pushScope = true)
         {
+            if(MatchToken(Token.TokenType.CurlyBracketOpen))
+            {
+                if(pushScope)
+                {
+                    _state.PushScope();
+                }
+                while (!IsEOF() && Peek().type != Token.TokenType.CurlyBracketClose)
+                {
+                    CompileStatement();
+                }
+                Require(Token.TokenType.CurlyBracketClose, "} Expected");
+                if (pushScope)
+                {
+                    _state.PopScope();
+                }
+                return true;
+            }
             return false;
         }
+        
 
     }
 }
