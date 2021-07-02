@@ -1,3 +1,4 @@
+#define DEBUG_MODE
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -8,6 +9,7 @@ namespace CLX
 {
     public partial class Compiler
     {
+        
         public class State
         {
             public class Reference
@@ -28,6 +30,7 @@ namespace CLX
                 public Datatype currentDatatype;
                 public Reference lvalueReference;
                 public int localVariableBytes;
+                public Scope currentScope;
 
                 public Substate Copy()
                 {
@@ -83,6 +86,25 @@ namespace CLX
                 }
             }
 
+            public Scope currentScope
+            {
+                get
+                {
+                    return _frames.Peek().currentScope;
+                }
+                set
+                {
+                    _frames.Peek().currentScope = value;
+                }
+            }
+            public Scope PushScope()
+            {
+                return _frames.Peek().currentScope.PushChild();
+            }
+            public Scope PopScope()
+            {
+                return _frames.Peek().currentScope.PopChild();
+            }
             /// <summary>
             /// Does the state have an open reference that can become either l/r?
             /// </summary>
@@ -94,9 +116,27 @@ namespace CLX
             /// <summary>
             /// Turn the saved l/r value into just an r value
             /// </summary>
-            public void CloseLRValueRef()
+            public void CloseLRValueRef(ref InstructionBuffer buffer)
             {
+                _frames.Peek().lvalueReference.datatype.GetLoadInstructions(ref buffer, _frames.Peek().lvalueReference);
                 _frames.Peek().lvalueReference = null;
+            }
+
+            /// <summary>
+            /// Collapses the current lr value into either an l (write) or an r (read)
+            /// </summary>
+            /// <param name="buffer"></param>
+            /// <param name="read"></param>
+            /// <returns></returns>
+            public Reference CollapseCurrentRef(ref InstructionBuffer buffer, bool read = true)
+            {
+                Reference output = _frames.Peek().lvalueReference;
+                if (read)
+                {
+                    _frames.Peek().lvalueReference.datatype.GetLoadInstructions(ref buffer, _frames.Peek().lvalueReference);
+                }
+                _frames.Peek().lvalueReference = null;
+                return output;
             }
 
             public State()
@@ -142,6 +182,7 @@ namespace CLX
             _assembly = new Assembly();
             _state = new State();
             _globalScope = new Scope();
+            _state.currentScope = _globalScope;
             try
             {
                 _tokens = lexer.Tokenize(script);
@@ -151,6 +192,14 @@ namespace CLX
             {
                 Debug.LogError("CLX Failed to parse: " + e.Message);
             }
+
+            InstructionBuffer.Node allocGlobalLocals = _ibuffer.Add(new Instruction(OpCode.AllocLoc, 0));
+#if DEBUG_MODE
+            while (!IsEOF())
+            {
+                CompileStatement();
+            }
+#else
             try
             {
                 while (!IsEOF())
@@ -163,7 +212,20 @@ namespace CLX
                 Debug.LogError("CLX Failed to compile: " + e.Message);
                 return null;
             }
+#endif
 
+            // Allocate the bytes for the local variables at the begining of the program
+            unsafe
+            {
+                fixed (byte* data = allocGlobalLocals.instruction.data)
+                {
+                    // We need to add the size (sizeof(byte**) + sizeof(Instruction*)) so that it matches with the offset of a function call
+                    // When a frame is pushed there will be a ip and byte* pushed onto the stack 
+                    // The local variable bytes are after that data
+                    *(int*)data = (sizeof(byte**) + sizeof(Instruction*)) + _state.localVariableBytes;
+                }
+            }
+            // Add the terminate program so that the thread terminates
             _ibuffer.Add(new Instruction(OpCode.Term));
             // add the instructions to the program
             _program.instructions = _ibuffer.BakeAndExport();
@@ -339,7 +401,7 @@ namespace CLX
             else if (Compile_Block())   { }
             else
             {
-                Compile_Expression();
+                Step_Expression.Execute();
                 Require(Token.TokenType.EOS, "; Required");
             }
         }

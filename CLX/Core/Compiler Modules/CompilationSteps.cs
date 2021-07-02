@@ -43,7 +43,7 @@ namespace CLX
                     Token op = compiler.previous;
                     if (compiler._state.HasLRValueRef())
                     {
-                        compiler._state.CloseLRValueRef();
+                        compiler._state.CollapseCurrentRef(ref compiler._ibuffer, true);;
                     }
                     // Save this node incase we need to convert the lvalue
                     InstructionBuffer.Node savedNode = compiler._ibuffer.tail;
@@ -52,7 +52,7 @@ namespace CLX
 
                     if (compiler._state.HasLRValueRef())
                     {
-                        compiler._state.CloseLRValueRef();
+                        compiler._state.CollapseCurrentRef(ref compiler._ibuffer, true);;
                     }
                     Datatype rtype = compiler._state.currentDatatype;
 
@@ -73,9 +73,34 @@ namespace CLX
 
             public override bool Execute()
             {
+                Debug.Log("Identifier:" + compiler.Peek());
                 if (compiler.MatchToken(Token.TokenType.Identifier))
                 {
-
+                    Token prev = this.compiler.previous;
+                    // Check to see if this identifier matches a type name
+                    // if it does match a type name then this is a declaration
+                    Datatype datatype = null;
+                    if(compiler._assembly.TryGetDatatype(prev.text, out datatype))
+                    {
+                        // Update the datatype field of the Declaration Step before calling execute
+                        compiler.Step_Declaration.datatype = datatype;
+                        compiler.Step_Declaration.Execute();
+                        return true;
+                    }
+                    // Check current scope for this element
+                    Scope.ScopeElement scopeElement = null;
+                    if(compiler._state.currentScope.TryGetElement(prev.text, out scopeElement))
+                    {
+                        // If found then set the current LR reference to the one found in this scope
+                        compiler._state.currentLRReference = scopeElement.reference;
+                        compiler._state.currentDatatype = scopeElement.reference.datatype;
+                        Debug.Log("LR Ref set " + compiler._state.currentLRReference);
+                    }
+                    else
+                    {
+                        throw new System.Exception($"The identifier {prev.text} was not found in the current scope");
+                    }
+                    
                 }
                 else
                 {
@@ -102,7 +127,7 @@ namespace CLX
                     Token op = compiler.previous;
                     if (compiler._state.HasLRValueRef())
                     {
-                        compiler._state.CloseLRValueRef();
+                        compiler._state.CollapseCurrentRef(ref compiler._ibuffer, true);;
                     }
                     compiler._state.currentDatatype.GetPreUnaryInstructions(op.type, ref compiler._ibuffer);
 
@@ -137,7 +162,7 @@ namespace CLX
                 Debug.Log("Primitive:" + compiler.Peek());
                 if (compiler.MatchToken(Token.TokenType.ParenthOpen))
                 {
-                    compiler.Compile_Expression();
+                    compiler.Step_Expression.Execute();
                     compiler.Require(Token.TokenType.ParenthClose, ") Expected");
                 }
                 else if (compiler.MatchToken(Token.TokenType.True))
@@ -210,20 +235,22 @@ namespace CLX
 
             public override bool Execute()
             {
-                Debug.Log("Assign:" + compiler.Peek());
                 next.Execute();
+
+                Debug.Log("Assign:" + compiler.Peek());
                 if (compiler.MatchToken(Token.TokenType.Assign))
                 {
                     if(!compiler._state.HasLRValueRef())
                     {
                         throw new System.Exception("Can only assign to an l-value");
                     }
-                    State.Reference lref = compiler._state.currentLRReference;
+                    State.Reference lref = compiler._state.CollapseCurrentRef(ref compiler._ibuffer, false);
 
                     compiler.Step_Expression.Execute();
+
                     if (compiler._state.HasLRValueRef())
                     {
-                        compiler._state.CloseLRValueRef();
+                        compiler._state.CollapseCurrentRef(ref compiler._ibuffer, true);;
                     }
 
                     lref.datatype.GetStoreInstructions(ref compiler._ibuffer, lref);
@@ -232,6 +259,58 @@ namespace CLX
 
                 }
                 return true;
+            }
+        }
+
+        protected class Compile_Declaration : CompilationStep
+        {
+            public Compile_Declaration(Compiler comp, CompilationStep next) : base(comp, next) { }
+            public Datatype datatype;
+            public override bool Execute()
+            {
+                Debug.Log("Declaration:" + compiler.Peek());
+                if (compiler.MatchToken(Token.TokenType.Identifier))
+                {
+                    string varname = compiler.previous.text;
+                    // See if the variable is already defined
+                    Scope.ScopeElement element = null;
+                    if(compiler._state.currentScope.TryGetElement(varname, out element))
+                    {
+                        throw new System.Exception($"The variable {varname} is already defined in this scope");
+                    }
+                    // TODO this is where the function declaration hook will be
+                    // Add the variable to the current scope
+                    unsafe
+                    {
+                        compiler._state.currentScope.AddElement(varname, new State.Reference
+                        {
+                            datatype = datatype,
+                            reftype = State.Reference.RefType.Local,
+                            offset = (sizeof(byte**) + sizeof(Instruction*)) + compiler._state.localVariableBytes
+                        });
+                        compiler._state.localVariableBytes += datatype.byteSize;
+                    }
+
+                    
+
+                }
+                else
+                {
+                    // For some reason we have a type name but this is not a declaration
+                    //next.Execute();
+                }
+                return true;
+            }
+
+        }
+
+
+        protected class Compile_Expression : CompilationStep
+        {
+            public Compile_Expression(Compiler comp, CompilationStep next) : base(comp, next) { }
+            public override bool Execute()
+            {
+                return next.Execute();
             }
         }
 
@@ -247,7 +326,7 @@ namespace CLX
         CompilationStep Step_Equality;
         CompilationStep Step_AndOr;
         CompilationStep Step_Assignment;
-        CompilationStep Step_Declaration;
+        Compile_Declaration Step_Declaration;
 
         CompilationStep Step_Expression;
 
@@ -264,6 +343,12 @@ namespace CLX
             Step_Comparison = new BinaryOpCompilationStep   (this, Step_AddSub,     "Compare", Token.TokenType.LessThan, Token.TokenType.GreaterThan, Token.TokenType.LessThanOrEqual, Token.TokenType.GreaterThanOrEqual);
             Step_Equality = new BinaryOpCompilationStep     (this, Step_Comparison, "Equality", Token.TokenType.Equals, Token.TokenType.NotEquals);
             Step_AndOr = new BinaryOpCompilationStep        (this, Step_Equality,   "AndOr", Token.TokenType.And, Token.TokenType.Or);
+            Step_Assignment = new Compile_Assignment        (this, Step_AndOr);
+            Step_Expression = new Compile_Expression        (this, Step_Assignment);
+
+            Step_Declaration = new Compile_Declaration      (this, null);
+
+            
         }
 
 
@@ -286,11 +371,6 @@ namespace CLX
         public bool Compile_Block()
         {
             return false;
-        }
-        public void Compile_Expression()
-        {
-            Debug.Log("**Expression:" + Peek());
-            Step_Equality.Execute();
         }
 
     }

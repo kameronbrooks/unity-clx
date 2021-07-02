@@ -50,6 +50,7 @@ namespace CLX {
         public void AddElement(string name, CLX.Compiler.State.Reference reference)
         {
             _elements.Add(name, new ScopeElement { name = name, reference = reference });
+            Debug.Log(this);
         }
         public bool TryGetElement(string name, out ScopeElement elem)
         {
@@ -98,6 +99,16 @@ namespace CLX {
             {
                 _elements[name] = value;
             }
+        }
+
+        public override string ToString()
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            foreach (var kvp in _elements)
+            {
+                sb.AppendLine($"{kvp.Key} ({kvp.Value.reference.datatype.name}) @ +{kvp.Value.reference.offset}");
+            }
+            return sb.ToString();
         }
     }
 }

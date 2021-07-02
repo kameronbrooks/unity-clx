@@ -25,7 +25,13 @@ namespace CLX
         /// <summary>
         /// How large is this on the stack
         /// </summary>
-        public readonly int byteSize;
+        public virtual int byteSize
+        {
+            get
+            {
+                return 4;
+            }
+        }
         /// <summary>
         /// Fully qualified name
         /// </summary>

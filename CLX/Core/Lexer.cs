@@ -468,7 +468,7 @@ namespace CLX
                     }
                     else
                     {
-                        return CreateToken(Token.TokenType.Equals, cur);
+                        return CreateToken(Token.TokenType.Assign, cur);
                     }
                 case '?':
                     if (Peek() == '.')
