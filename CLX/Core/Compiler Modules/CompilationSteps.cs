@@ -354,6 +354,29 @@ namespace CLX
 
         public bool Compile_If()
         {
+            if(MatchToken(Token.TokenType.If))
+            {
+                // Conditional statement
+                Step_Expression.Execute();
+                
+                InstructionBuffer.Node branchNode = _ibuffer.Add(OpCode.BrchFalse, 0);
+                // body
+                CompileStatement();
+                // look for else clause
+                if(!IsEOF() && MatchToken(Token.TokenType.Else))
+                {
+                    InstructionBuffer.Node jumpNode = _ibuffer.Add(OpCode.Jump);
+                    _ibuffer.PushForwardBranchTarget(branchNode);
+                    CompileStatement();
+                    _ibuffer.PushForwardBranchTarget(jumpNode);
+                }
+                else
+                {
+                    _ibuffer.PushForwardBranchTarget(branchNode);
+                }
+                return true;
+
+            }
             return false;
         }
         public bool Compile_For()

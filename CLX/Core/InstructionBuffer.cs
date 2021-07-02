@@ -62,6 +62,13 @@ namespace CLX
 
         Node _root;
         Node _tail;
+
+        Stack<Node> _forwardBranchTargets;
+
+        public InstructionBuffer()
+        {
+            _forwardBranchTargets = new Stack<Node>();
+        }
         /// <summary>
         /// Count the nodes from head to tail
         /// </summary>
@@ -136,7 +143,7 @@ namespace CLX
                     previous = null,
                     next = null
                 };
-
+                UpdateForwardBranchTargets(_root);
                 return _tail = _root;
             }
             else
@@ -147,6 +154,7 @@ namespace CLX
                     previous = null,
                     next = null
                 };
+                UpdateForwardBranchTargets(newNode);
                 return _tail = _tail.InsertAfter(newNode);
 
             }
@@ -229,6 +237,23 @@ namespace CLX
             get
             {
                 return _root;
+            }
+        }
+        /// <summary>
+        /// Push a node onto the forward branch target stack
+        /// This is for branches that need to branch to a node that has not been added to the stack yet
+        /// Any node in this stack will reference the next node that is added to the buffer
+        /// </summary>
+        /// <param name="target"></param>
+        public void PushForwardBranchTarget(Node target)
+        {
+            _forwardBranchTargets.Push(target);
+        }
+        private void UpdateForwardBranchTargets(Node targetNode)
+        {
+            while(_forwardBranchTargets.Count > 0)
+            {
+                _forwardBranchTargets.Pop().reference = targetNode;
             }
         }
         public override string ToString()

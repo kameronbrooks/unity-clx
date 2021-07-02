@@ -97,6 +97,9 @@ namespace CLX
                     _frames.Peek().currentScope = value;
                 }
             }
+
+            
+
             public Scope PushScope()
             {
                 return _frames.Peek().currentScope.PushChild();
