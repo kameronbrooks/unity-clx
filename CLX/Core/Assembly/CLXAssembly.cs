@@ -161,6 +161,12 @@ namespace CLX
                 dt.parentNamespace = this;
                 return dt;
             }
+            public Datatype AddDatatype(Datatype dt, string alias)
+            {
+                _map.Add(alias, dt);
+                dt.parentNamespace = this;
+                return dt;
+            }
 
             public IAssemblyElement this[string name]
             {
@@ -188,8 +194,12 @@ namespace CLX
             //datatypes.STRING = new Datatype("dict", Datatype.TYPEID_DICTIONARY);
 
             _global.AddDatatype(datatypes.BOOL);
+
             _global.AddDatatype(datatypes.INT32);
+            _global.AddDatatype(datatypes.INT32, "int");
+
             _global.AddDatatype(datatypes.FLOAT32);
+            _global.AddDatatype(datatypes.FLOAT32, "float");
             //_global.AddDatatype(datatypes.STRING);
             //_global.AddDatatype(datatypes.DICTIONARY);
         }

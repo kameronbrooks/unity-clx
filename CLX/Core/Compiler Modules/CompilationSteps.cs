@@ -385,6 +385,24 @@ namespace CLX
         }
         public bool Compile_While()
         {
+            if (MatchToken(Token.TokenType.While))
+            {
+                InstructionBuffer.Node conditionNode = _ibuffer.tail;
+                Step_Equality.Execute();
+                conditionNode = conditionNode.next;
+
+                if(_state.HasLRValueRef())
+                {
+                    _state.CollapseCurrentRef(ref _ibuffer, true);
+                }
+                InstructionBuffer.Node branchNode = _ibuffer.Add(OpCode.BrchFalse, 0);
+                CompileStatement();
+                InstructionBuffer.Node jumpNode = _ibuffer.Add(OpCode.Jump);
+                jumpNode.reference = conditionNode;
+                _ibuffer.PushForwardBranchTarget(branchNode);
+
+                return true;
+            }
             return false;
         }
         public bool Compile_Foreach()
@@ -412,7 +430,23 @@ namespace CLX
             }
             return false;
         }
-        
+
+        public bool Compile_Print()
+        {
+            if(Peek().text == "print")
+            {
+                Step();
+                CompileStatement();
+                if (_state.HasLRValueRef())
+                {
+                    _state.CollapseCurrentRef(ref _ibuffer, true);
+                }
+                _state.currentDatatype.GetPrintInstructions(ref _ibuffer);
+                return true;
+            }
+            return false;
+        }
+
 
     }
 }

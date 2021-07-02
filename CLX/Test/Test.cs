@@ -27,7 +27,7 @@ public class Test : MonoBehaviour
         Program prog = compiler.Compile(script, null);
         Debug.Log(prog.ToString());
         Thread thread = new Thread(512);
-        //thread.Execute(prog, null);
+        thread.Execute(prog, null);
     }
     // Update is called once per frame
     void Update()

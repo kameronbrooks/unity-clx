@@ -40,5 +40,9 @@ namespace CLX
         {
             return this;
         }
+        public override void GetPrintInstructions(ref InstructionBuffer buffer)
+        {
+            buffer.Add(OpCode.Prnt_bool);
+        }
     }
 }

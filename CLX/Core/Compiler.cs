@@ -402,6 +402,7 @@ namespace CLX
             else if (Compile_For())     { }
             else if (Compile_Foreach()) { }
             else if (Compile_Block())   { }
+            else if (Compile_Print()) { }
             else
             {
                 Step_Expression.Execute();

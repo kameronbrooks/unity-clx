@@ -86,6 +86,7 @@ namespace CLX
         public abstract Datatype GetStoreInstructions(ref InstructionBuffer buffer, Compiler.State.Reference reference);
         public abstract Datatype GetLoadInstructions(ref InstructionBuffer buffer, Compiler.State.Reference reference);
         public abstract Datatype GetConvertInstructions(ref InstructionBuffer buffer, Datatype target);
+        public abstract void GetPrintInstructions(ref InstructionBuffer buffer);
         public virtual void ApplyTypePrecedence(Datatype rtype, InstructionBuffer.Node insertionNode)
         {
 

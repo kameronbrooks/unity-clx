@@ -77,11 +77,11 @@ namespace CLX
                                 /* =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= */
                                 /* =-=-=-=-=-=-=-=-=-= Branches =-=-=-=-=-=-=-=-=-=-=    */
                                 /* =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= */
-                                case OpCode.BrchFalse:
-                                    ip = (*((bool*)sp++)) ? instructions + *(int*)ip->data : ip + 1;
-                                    break;
                                 case OpCode.BrchTrue:
-                                    ip = (*((bool*)sp++)) ? ip + 1 : instructions + *(int*)ip->data;
+                                    ip = (*((bool*)(sp++))) ? (instructions + (*(int*)ip->data)) : ip + 1;
+                                    break;
+                                case OpCode.BrchFalse:
+                                    ip = (*((bool*)(sp++))) ? ip + 1 : instructions + *(int*)ip->data;
                                     break;
 
                                 /* =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= */
@@ -104,27 +104,33 @@ namespace CLX
                                 /* =-=-=-=-=-=-=-=-=-= Comparison  =-=-=-=-=-=-=-=-=-=-= */
                                 /* =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= */
                                 case OpCode.Eq_i32:
-                                    *((bool*)(sp += STACK_SHIFT_INT32_COMPARISON)) = *((int*)(sp + SIZE_INT32)) == *((int*)(sp));
+                                    *((bool*)(sp + STACK_SHIFT_INT32_COMPARISON)) = *((int*)(sp + SIZE_INT32)) == *((int*)(sp));
+                                    sp += STACK_SHIFT_INT32_COMPARISON;
                                     ++ip;
                                     break;
                                 case OpCode.NEq_i32:
-                                    *((bool*)(sp += STACK_SHIFT_INT32_COMPARISON)) = *((int*)(sp + SIZE_INT32)) != *((int*)(sp));
+                                    *((bool*)(sp + STACK_SHIFT_INT32_COMPARISON)) = *((int*)(sp + SIZE_INT32)) != *((int*)(sp));
+                                    sp += STACK_SHIFT_INT32_COMPARISON;
                                     ++ip;
                                     break;
                                 case OpCode.LT_i32:
-                                    *((bool*)(sp += STACK_SHIFT_INT32_COMPARISON)) = *((int*)(sp + SIZE_INT32)) < *((int*)(sp));
+                                    *((bool*)(sp + STACK_SHIFT_INT32_COMPARISON)) = ((*((int*)(sp + SIZE_INT32))) < (*((int*)(sp))));
+                                    sp += STACK_SHIFT_INT32_COMPARISON;
                                     ++ip;
                                     break;
                                 case OpCode.GT_i32:
-                                    *((bool*)(sp += STACK_SHIFT_INT32_COMPARISON)) = *((int*)(sp + SIZE_INT32)) > *((int*)(sp));
+                                    *((bool*)(sp + STACK_SHIFT_INT32_COMPARISON)) = *((int*)(sp + SIZE_INT32)) > *((int*)(sp));
+                                    sp += STACK_SHIFT_INT32_COMPARISON;
                                     ++ip;
                                     break;
                                 case OpCode.LTEq_i32:
-                                    *((bool*)(sp += STACK_SHIFT_INT32_COMPARISON)) = *((int*)(sp + SIZE_INT32)) <= *((int*)(sp));
+                                    *((bool*)(sp + STACK_SHIFT_INT32_COMPARISON)) = *((int*)(sp + SIZE_INT32)) <= *((int*)(sp));
+                                    sp += STACK_SHIFT_INT32_COMPARISON;
                                     ++ip;
                                     break;
                                 case OpCode.GTEq_i32:
-                                    *((bool*)(sp += STACK_SHIFT_INT32_COMPARISON)) = *((int*)(sp + SIZE_INT32)) >= *((int*)(sp));
+                                    *((bool*)(sp + STACK_SHIFT_INT32_COMPARISON)) = *((int*)(sp + SIZE_INT32)) >= *((int*)(sp));
+                                    sp += STACK_SHIFT_INT32_COMPARISON;
                                     ++ip;
                                     break;
                                 /* =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= */
@@ -160,11 +166,21 @@ namespace CLX
                                     ++sp;
                                     ++ip;
                                     break;
+                                case OpCode.LdLoc_i32:
+                                    *((int*)(sp -= SIZE_INT32)) = *(int*)(fp - (*(int*)ip->data));
+                                    ++ip;
+                                    break;
+                                case OpCode.StLoc_i32:
+                                    *(int*)(fp - (*(int*)ip->data)) = *((int*)(sp));
+                                    sp += SIZE_INT32;
+                                    ++ip;
+                                    break;
                                 case OpCode.PushFrame:
                                     // push return instruction
                                     *((Instruction**)(sp -= SIZE_INT64)) = ip + 1;
                                     // push old frame pointer
-                                    *((byte**)(sp -= sizeof(byte*))) = sp;
+                                    *((byte**)(sp - sizeof(byte*))) = sp;
+                                    sp -= sizeof(byte*);
                                     fp = sp;
                                     break;
                                 case OpCode.PopFrame:
@@ -253,10 +269,12 @@ namespace CLX
                                 /* =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= */
                                 case OpCode.Prnt_bool:
                                     Debug.Log(*((bool*)(sp)) ? "true" : "false");
+                                    sp++;
                                     ++ip;
                                     break;
                                 case OpCode.Prnt_i32:
                                     Debug.Log(*((int*)(sp)));
+                                    sp += SIZE_INT32;
                                     ++ip;
                                     break;
                                 case OpCode.Term:
