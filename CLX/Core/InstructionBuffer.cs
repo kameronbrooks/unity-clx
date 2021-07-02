@@ -45,6 +45,14 @@ namespace CLX
                 }
                 return next = node;
             }
+            public Node InsertAfter(InstructionBuffer buffer)
+            {
+                if(next != null)
+                {
+                    buffer.root.GetTail().next = next;
+                }
+                return next = buffer.root;
+            }
             /// <summary>
             /// Insert a node before this node
             /// </summary>
@@ -57,6 +65,27 @@ namespace CLX
                     node.GetHead().previous = previous;
                 }
                 return previous = node;
+            }
+            public Node InsertBefore(InstructionBuffer buffer)
+            {
+                if (previous != null)
+                {
+                    buffer.root.previous = previous;
+                }
+                return previous = buffer.tail;
+            }
+            /// <summary>
+            /// Cuts the chain here making this the root of its own chain
+            /// </summary>
+            /// <returns></returns>
+            public Node Cut()
+            {
+                if(previous != null)
+                {
+                    previous.next = null;
+                }
+                previous = null;
+                return this;
             }
         }
 
@@ -183,6 +212,22 @@ namespace CLX
         {
             return Add(new Instruction(op, val));
         }
+
+        public Node Append(InstructionBuffer other)
+        {
+            if(this.tail == null)
+            {
+                this._root = other._root;
+                Normalize();
+                return _tail;
+            }
+            else
+            {
+                _tail.InsertAfter(other._root);
+                Normalize();
+                return _tail;
+            }
+        }
         /// <summary>
         /// Make sure that head and tail are correct
         /// </summary>
@@ -239,6 +284,7 @@ namespace CLX
                 return _root;
             }
         }
+
         /// <summary>
         /// Push a node onto the forward branch target stack
         /// This is for branches that need to branch to a node that has not been added to the stack yet

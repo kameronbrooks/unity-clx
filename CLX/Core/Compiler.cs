@@ -405,8 +405,12 @@ namespace CLX
             else if (Compile_Print()) { }
             else
             {
-                Step_Expression.Execute();
-                Require(Token.TokenType.EOS, "; Required");
+                if(!MatchToken(Token.TokenType.EOS))
+                {
+                    Step_Expression.Execute();
+                    Require(Token.TokenType.EOS, "; Required");
+                }
+                
             }
         }
 

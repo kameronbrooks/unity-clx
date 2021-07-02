@@ -381,6 +381,49 @@ namespace CLX
         }
         public bool Compile_For()
         {
+            if (MatchToken(Token.TokenType.For))
+            {
+                bool parenthEnclosed = false;
+                // Intialization statement
+                if(!MatchToken(Token.TokenType.EOS))
+                {
+                    parenthEnclosed = MatchToken(Token.TokenType.ParenthOpen);
+                    
+                    Step_Expression.Execute();
+                    Require(Token.TokenType.EOS, "; Required");
+                }
+                // Condition statement
+                InstructionBuffer.Node conditionNode = _ibuffer.tail;
+                Step_Equality.Execute();
+                conditionNode = conditionNode.next;
+
+                if (_state.HasLRValueRef())
+                {
+                    _state.CollapseCurrentRef(ref _ibuffer, true);
+                }
+                InstructionBuffer.Node branchNode = _ibuffer.Add(OpCode.BrchFalse, 0);
+                Require(Token.TokenType.EOS, "; Required");
+                // Increment statement
+                InstructionBuffer tempBuffer = new InstructionBuffer();
+                InstructionBuffer oldBuffer = _ibuffer;
+                _ibuffer = tempBuffer;
+                Step_Expression.Execute();
+                _ibuffer = oldBuffer;
+
+                if(parenthEnclosed)
+                {
+                    Debug.Log("Peek: " + Peek().text);
+                    Require(Token.TokenType.ParenthClose, ") Expected");
+                }
+                // Body
+                CompileStatement();
+                _ibuffer.Append(tempBuffer);
+                InstructionBuffer.Node jumpNode = _ibuffer.Add(OpCode.Jump);
+                jumpNode.reference = conditionNode;
+                _ibuffer.PushForwardBranchTarget(branchNode);
+
+                return true;
+            }
             return false;
         }
         public bool Compile_While()
