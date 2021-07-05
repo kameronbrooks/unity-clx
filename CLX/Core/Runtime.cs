@@ -1,7 +1,8 @@
-#define SAFE_LOOP
+//#define SAFE_LOOP
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+
 
 namespace CLX
 {
@@ -18,11 +19,13 @@ namespace CLX
         public fixed int register[REGISTER_COUNT];
         public byte[] _stack;
         int _stackSize;
+        Heap _dynamicHeap;
 
         public Thread(int stackSize)
         {
             _stackSize = stackSize;
             _stack = new byte[_stackSize];
+            _dynamicHeap = new Heap();
         }
 
         /// <summary>
@@ -52,7 +55,7 @@ namespace CLX
                         byte* fp = sp;
                         // initialize instruction pointer
                         Instruction* ip = instructions;
-
+                        
                         bool continueLoop = true;
 #if SAFE_LOOP
                         int __safety__accum = 1000000;
@@ -68,6 +71,7 @@ namespace CLX
                                 Debug.LogError("Exceded the saftey count. Potential infinite loop.");
                             }
 #endif
+                            
                             // Main op code logic
                             switch(ip->opCode)
                             {
@@ -284,6 +288,9 @@ namespace CLX
                                     throw new System.Exception("Invalid Operation: " + ip->opCode.ToString());
                             }
                         }
+                        // Get time data
+                        
+
                     }
                 }
             }

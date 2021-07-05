@@ -6,6 +6,7 @@ namespace CLX
 {
     public class Program
     {
+        public object[] constObjects;
         public Instruction[] instructions;
         public int minStackSize;
     }

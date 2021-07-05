@@ -57,6 +57,52 @@ namespace CLX
                         return this;
                     }
                     break;
+                case Token.TokenType.Equals:
+                    if (rtype == this)
+                    {
+                        buffer.Add(OpCode.Eq_f32);
+                        return this;
+                    }
+                    break;
+                case Token.TokenType.NotEquals:
+                    if (rtype == this)
+                    {
+                        buffer.Add(OpCode.NEq_f32);
+                        return this;
+                    }
+                    break;
+                case Token.TokenType.GreaterThan:
+                    if (rtype == this)
+                    {
+                        buffer.Add(OpCode.GT_f32);
+
+                        return this;
+                    }
+                    break;
+                case Token.TokenType.LessThan:
+                    if (rtype == this)
+                    {
+                        buffer.Add(OpCode.LT_f32);
+
+                        return this;
+                    }
+                    break;
+                case Token.TokenType.GreaterThanOrEqual:
+                    if (rtype == this)
+                    {
+                        buffer.Add(OpCode.GTEq_f32);
+
+                        return this;
+                    }
+                    break;
+                case Token.TokenType.LessThanOrEqual:
+                    if (rtype == this)
+                    {
+                        buffer.Add(OpCode.LTEq_f32);
+
+                        return this;
+                    }
+                    break;
                 default:
                     break;
             }
@@ -70,6 +116,19 @@ namespace CLX
 
         public override Datatype GetLoadInstructions(ref InstructionBuffer buffer, Compiler.State.Reference reference)
         {
+            switch (reference.reftype)
+            {
+                case Compiler.State.Reference.RefType.Local:
+                    buffer.Add(OpCode.LdLoc_i32, reference.offset);
+                    break;
+                case Compiler.State.Reference.RefType.Arg:
+                    buffer.Add(OpCode.LdArg_i32, reference.offset);
+                    break;
+                case Compiler.State.Reference.RefType.Reg:
+                    break;
+                default:
+                    throw new System.Exception($"The storage type is not supported by this data type({_name})");
+            }
             return this;
         }
 
@@ -83,7 +142,7 @@ namespace CLX
             switch (opType)
             {
                 case Token.TokenType.Negate:
-                    buffer.Add(OpCode.Neg_i32);
+                    buffer.Add(OpCode.Neg_f32);
                     return this;
 
 
@@ -95,6 +154,19 @@ namespace CLX
 
         public override Datatype GetStoreInstructions(ref InstructionBuffer buffer, Compiler.State.Reference reference)
         {
+            switch (reference.reftype)
+            {
+                case Compiler.State.Reference.RefType.Local:
+                    buffer.Add(OpCode.StLoc_i32, reference.offset);
+                    break;
+                case Compiler.State.Reference.RefType.Arg:
+                    buffer.Add(OpCode.StArg_i32, reference.offset);
+                    break;
+                case Compiler.State.Reference.RefType.Reg:
+                    break;
+                default:
+                    throw new System.Exception($"The storage type is not supported by this data type({_name})");
+            }
             return this;
         }
 
