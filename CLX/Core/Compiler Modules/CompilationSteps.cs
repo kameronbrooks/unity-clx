@@ -96,10 +96,22 @@ namespace CLX
                         compiler._state.currentDatatype = scopeElement.reference.datatype;
                         Debug.Log("LR Ref set " + compiler._state.currentLRReference);
                     }
-                    else if ()
+                    // Check to see if we are referencing an api member
+                    else if (compiler._state.externalTarget != null || ReflectionUtility.HasMember(compiler._state.externalTarget, prev.text))
                     {
+                        string name = compiler._state.externalTarget.FullName + "." + prev.text;
+                        Program.Resource resource = null;
+                        if(!compiler._resourceTable.TryGetValue(name, out resource))
+                        {
+                            // Change this later to support overloaded methods
+                            resource = ReflectionUtility.GenerateResource(compiler._state.externalTarget, prev.text)[0];
+                            compiler._resourceTable.Add(name, resource);
+                        }
 
+
+                        
                     }
+                    // We dont know what this thing is
                     else
                     {
                         throw new System.Exception($"The identifier {prev.text} was not found in the current scope");

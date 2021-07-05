@@ -31,12 +31,15 @@ namespace CLX
                 public Reference lvalueReference;
                 public int localVariableBytes;
                 public Scope currentScope;
+                public Type externalTarget;
 
                 public Substate Copy()
                 {
                     return new Substate
                     {
-                        currentDatatype = currentDatatype
+                        currentDatatype = currentDatatype,
+                        externalTarget = externalTarget
+                        
                     };
                 }
             }
@@ -95,6 +98,18 @@ namespace CLX
                 set
                 {
                     _frames.Peek().currentScope = value;
+                }
+            }
+
+            public Type externalTarget
+            {
+                get
+                {
+                    return _frames.Peek().externalTarget;
+                }
+                set
+                {
+                    _frames.Peek().externalTarget = value;
                 }
             }
 
@@ -169,6 +184,7 @@ namespace CLX
         Assembly _assembly;
         State _state;
         Scope _globalScope;
+        Dictionary<string, Program.Resource> _resourceTable;
 
         public Compiler()
         {
@@ -182,10 +198,12 @@ namespace CLX
             _targetType = targetType;
             Lexer lexer = new Lexer();
             _ibuffer = new InstructionBuffer();
+            _resourceTable = new Dictionary<string, Program.Resource>();
             _assembly = new Assembly();
             _state = new State();
             _globalScope = new Scope();
             _state.currentScope = _globalScope;
+            _state.externalTarget = targetType;
             try
             {
                 _tokens = lexer.Tokenize(script);

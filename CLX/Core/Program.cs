@@ -11,18 +11,22 @@ namespace CLX
         {
             public string name;
             System.Delegate[] func;
-            public object[] args;
+            public object[] args0;
+            public object[] args1;
             public System.Type returnType;
+            public int id;
+            public MemberTypes memberType;
 
             public Resource(System.Delegate f, int argCount)
             {
-                args = new object[argCount];
+                args0 = new object[argCount];
                 func = new System.Delegate[1];
                 func[0] = f;
             }
-            public Resource(System.Delegate get, System.Delegate set, int argCount)
+            public Resource(System.Delegate get, System.Delegate set, int argCount0, int argCount1)
             {
-                args = new object[argCount];
+                args0 = new object[argCount0];
+                args1 = new object[argCount1];
                 func = new System.Delegate[2];
                 func[0] = get;
                 func[1] = set;
@@ -37,29 +41,29 @@ namespace CLX
             }
             public T Invoke<T> (object target)
             {
-                args[0] = target;
-                return (T)func[0].DynamicInvoke(args);
+                args0[0] = target;
+                return (T)func[0].DynamicInvoke(args0);
             }
             public T Invoke<T>(object target, object arg0)
             {
-                args[0] = target;
-                args[1] = arg0;
-                return (T)func[0].DynamicInvoke(args);
+                args0[0] = target;
+                args0[1] = arg0;
+                return (T)func[0].DynamicInvoke(args0);
             }
             public T Invoke<T>(object target, object arg0, object arg1)
             {
-                args[0] = target;
-                args[1] = arg0;
-                args[2] = arg1;
-                return (T)func[0].DynamicInvoke(args);
+                args0[0] = target;
+                args0[1] = arg0;
+                args0[2] = arg1;
+                return (T)func[0].DynamicInvoke(args0);
             }
             public T Invoke<T>(object target, object arg0, object arg1, object arg2)
             {
-                args[0] = target;
-                args[1] = arg0;
-                args[2] = arg1;
-                args[3] = arg2;
-                return (T)func[0].DynamicInvoke(args);
+                args0[0] = target;
+                args0[1] = arg0;
+                args0[2] = arg1;
+                args0[3] = arg2;
+                return (T)func[0].DynamicInvoke(args0);
             }
         }
 

@@ -102,39 +102,92 @@ namespace CLX
             Program.Resource output = new Program.Resource(del, argInfo.Length+1);
             output.returnType = method.ReturnType;
             output.name = target.FullName + "." + method.Name;
-
+            output.memberType = MemberTypes.Method;
             return output;
         }
 
-        public static Program.Resource[] GenerateResource(Type target, PropertyInfo prop)
+        public static Program.Resource GenerateResource(Type target, PropertyInfo prop)
         {
-            Program.Resource[] output = new Program.Resource[2];
-
-            if(prop.CanRead)
-            {
-                output[0] = GenerateResource(target, prop.GetMethod);
-            }
-            if (prop.CanWrite)
-            {
-                output[1] = GenerateResource(target, prop.SetMethod);
-            }
+            Delegate getDel = prop.CanRead ? MethodToOpenDelegate(target, prop.GetGetMethod()) : null;
+            Delegate setDel = prop.CanWrite ? MethodToOpenDelegate(target, prop.GetSetMethod()) : null;
+            Program.Resource output = new Program.Resource(getDel, setDel, 2,3);
+            output.returnType = prop.PropertyType;
+            output.name = target.FullName + "." + prop.Name;
+            output.memberType = MemberTypes.Property;
             return output;
         }
 
-        public static Program.Resource[] GenerateResource(Type target, FieldInfo field)
+        public static Program.Resource GenerateResource(Type target, FieldInfo field)
         {
-            Program.Resource[] output = new Program.Resource[2];
 
             MethodInfo getMethod = field.GetType().GetMethod("GetValue");
             Delegate getDel = MethodToInstanceDelegate(field, getMethod);
 
-            
             MethodInfo setMethod = field.GetType().GetMethod("SetValue");
             Delegate setDel = MethodToInstanceDelegate(field, setMethod);
 
-
+            Program.Resource output = new Program.Resource(getDel, setDel, 2,3);
+            output.returnType = field.FieldType;
+            output.name = target.FullName + "." + field.Name;
+            output.memberType = MemberTypes.Field;
 
             return output;
+        }
+
+        public static Program.Resource GenerateResource(Type target, MemberInfo member)
+        {
+            if(member.MemberType == MemberTypes.Method)
+            {
+                return GenerateResource(target, (MethodInfo)member);
+            }
+            else if (member.MemberType == MemberTypes.Property)
+            {
+                return GenerateResource(target, (PropertyInfo)member);
+            }
+            else if (member.MemberType == MemberTypes.Field)
+            {
+                return GenerateResource(target, (FieldInfo)member);
+            }
+            else
+            {
+                throw new Exception("unsupported type of resource");
+            }
+        }
+
+        public static Program.Resource[] GenerateResource(Type target, string name)
+        {
+            MemberInfo[] members = GetMemberInfo(target, name);
+            Program.Resource[] output = new Program.Resource[members.Length];
+            for(int i = 0; i < members.Length; ++i)
+            {
+                output[i] = GenerateResource(target, members[i]);
+            }
+            return output;
+        }
+
+        public static string GetUniqueName(MethodInfo method)
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            sb.Append(method.DeclaringType.FullName);
+            sb.Append(".");
+            sb.Append(method.Name);
+            sb.Append("(");
+            foreach(var arg in method.GetParameters())
+            {
+                if (sb[sb.Length - 1] != '(') sb.Append(", ");
+                sb.Append(arg.ParameterType.FullName);
+            }
+            sb.Append(")");
+
+            return sb.ToString();
+        }
+        public static string GetUniqueName(PropertyInfo prop)
+        {
+            return prop.DeclaringType + "." + prop.Name;
+        }
+        public static string GetUniqueName(FieldInfo field)
+        {
+            return field.DeclaringType + "." + field.Name;
         }
 
 
