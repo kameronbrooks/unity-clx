@@ -96,6 +96,10 @@ namespace CLX
                         compiler._state.currentDatatype = scopeElement.reference.datatype;
                         Debug.Log("LR Ref set " + compiler._state.currentLRReference);
                     }
+                    else if ()
+                    {
+
+                    }
                     else
                     {
                         throw new System.Exception($"The identifier {prev.text} was not found in the current scope");
