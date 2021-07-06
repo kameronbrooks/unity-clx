@@ -119,11 +119,10 @@ namespace CLX
 
         public static Program.Resource GenerateResource(Type target, FieldInfo field)
         {
-
             MethodInfo getMethod = field.GetType().GetMethod("GetValue");
             Delegate getDel = MethodToInstanceDelegate(field, getMethod);
-
-            MethodInfo setMethod = field.GetType().GetMethod("SetValue");
+            
+            MethodInfo setMethod = field.GetType().GetMethod("SetValue",new Type[] { typeof(object), typeof(object) });
             Delegate setDel = MethodToInstanceDelegate(field, setMethod);
 
             Program.Resource output = new Program.Resource(getDel, setDel, 2,3);

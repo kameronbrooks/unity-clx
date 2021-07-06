@@ -7,6 +7,30 @@ using System.Runtime.CompilerServices;
 [ExecuteInEditMode]
 public class Test : MonoBehaviour
 {
+    class TestClass
+    {
+        public int field1;
+
+        private int privatField;
+        public int prop1
+        {
+            get
+            {
+                return privatField;
+            }
+            set
+            {
+                privatField = value;
+            }
+        }
+
+        public int method1()
+        {
+            return 10;
+        }
+    }
+
+
     [Multiline] 
     public string script;
     public string output;
@@ -17,6 +41,8 @@ public class Test : MonoBehaviour
         
     }
 
+    
+
 
     public void RunTest1()
     {
@@ -24,13 +50,17 @@ public class Test : MonoBehaviour
 
         InstructionBuffer buffer = new InstructionBuffer();
 
+
+
         Compiler compiler = new Compiler();
-        Program prog = compiler.Compile(script, null);
+        Program prog = compiler.Compile(script, typeof(TestClass));
         //Debug.Log(prog.ToString());
         Thread thread = new Thread(512);
 
+        TestClass testTarget = new TestClass();
+
         System.Diagnostics.Stopwatch watch = System.Diagnostics.Stopwatch.StartNew();
-        thread.Execute(prog, null);
+        thread.Execute(prog, testTarget);
         System.TimeSpan elapsed = watch.Elapsed;
         watch.Stop();
         Debug.Log($"CLX Time: {elapsed.TotalMilliseconds}ms");
