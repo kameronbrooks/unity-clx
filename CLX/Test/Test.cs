@@ -23,11 +23,70 @@ public class Test : MonoBehaviour
                 privatField = value;
             }
         }
-
+        [APIMethod]
         public int method1()
         {
             return 10;
         }
+
+        public void Method2()
+        {
+
+        }
+    }
+
+    [CLXAPIClass(typeof(TestClass))]
+    class TestClassAPI : CSharpAPI
+    {
+        public override unsafe API_CALL GetField(string name)
+        {
+            if(name == "field1")
+            {
+                return (a, b) =>
+                {
+                    *((int*)*a) = ((TestClass)b.Pop()).field1;
+                };
+            }
+
+            throw new System.Exception($"Unsupported api call {name} in api_class {this.targetType.Name}");
+        }
+
+        public override unsafe API_CALL GetProperty(string name)
+        {
+            if (name == "prop1")
+            {
+                return (a, b) =>
+                {
+                    *((int*)*a) = ((TestClass)b.Pop()).prop1;
+                };
+            }
+
+            throw new System.Exception($"Unsupported api call {name} in api_class {this.targetType.Name}");
+        }
+
+        public override unsafe API_CALL Method(string name)
+        {
+            throw new System.Exception($"Unsupported api call {name} in api_class {this.targetType.Name}");
+        }
+
+        public override unsafe API_CALL SetField(string name)
+        {
+            throw new System.Exception($"Unsupported api call {name} in api_class {this.targetType.Name}");
+        }
+
+        public override unsafe API_CALL SetProperty(string name)
+        {
+            if (name == "prop1")
+            {
+                return (a, b) =>
+                {
+                    ((TestClass)b.Pop()).prop1 = *((int*)*a);
+                };
+            }
+
+            throw new System.Exception($"Unsupported api call {name} in api_class {this.targetType.Name}");
+        }
+            
     }
 
 

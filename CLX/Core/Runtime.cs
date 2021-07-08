@@ -286,41 +286,16 @@ namespace CLX
                                     _objectStack.Push(apiTarget);
                                     ++ip;
                                     break;
-                                case OpCode.Call_API_bool:
-                                    *((bool*)(sp--)) = program.resources[*(int*)ip->data].Invoke<bool>(apiTarget);
+                                case OpCode.Call_API:
+                                    _objectStack.Push(apiTarget);
+                                    program.resources[*(int*)ip->data].func(&sp,_objectStack);
                                     ++ip;
                                     break;
-                                case OpCode.Call_API_i32:
-                                    *((int*)(sp -= SIZE_INT32)) = program.resources[*(int*)ip->data].Invoke<int>(apiTarget);
+                                case OpCode.Call_Extern:
+                                    program.resources[*(int*)ip->data].func(&sp, _objectStack);
                                     ++ip;
                                     break;
-                                case OpCode.Call_API_f32:
-                                    *((float*)(sp -= SIZE_INT32)) = program.resources[*(int*)ip->data].Invoke<float>(apiTarget);
-                                    ++ip;
-                                    break;
-                                case OpCode.Call_API_obj:
-                                    _objectStack.Push(program.resources[*(int*)ip->data].Invoke<object>(apiTarget));
-                                    ++ip;
-                                    break;
-                                case OpCode.Push_Ext_Arg0:
-                                    /*
-                                    program.resources[*(int*)ip->data].args0[0] = _dynamicHeap.Get(*((int*)(sp))).ptr;
-                                    sp += SIZE_INT32;
-                                    */
-                                    // using a separate object stack for now
-                                    resourceTarget = program.resources[*(int*)ip->data];
-                                    resourceTarget.args0[0] = _objectStack.Pop();
-                                    ++ip;
-                                    break;
-                                case OpCode.Push_Ext_Arg_Obj:
-                                    program.resources[*(int*)ip->data].args0[*(int*)(ip->data + sizeof(int))] = _dynamicHeap.Get(*((int*)(sp))).ptr;
-                                    sp += SIZE_INT32;
-                                    ++ip;
-                                    break;
-                                case OpCode.Call_Ext_i32:
-                                    program.resources[*(int*)ip->data].Invoke<int>(_objectStack.Pop());
-                                    ++ip;
-                                    break;
+
                                 /* =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= */
                                 /* =-=-=-=-=-=-=-=-=-= Print       =-=-=-=-=-=-=-=-=-=-= */
                                 /* =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= */

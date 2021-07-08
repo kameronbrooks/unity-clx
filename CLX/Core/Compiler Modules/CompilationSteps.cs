@@ -101,16 +101,14 @@ namespace CLX
                     {
                         string name = compiler._state.externalTarget.FullName + "." + prev.text;
                         Program.Resource resource = null;
+                        // Check if resource already exists
                         if(!compiler._resourceTable.TryGetValue(name, out resource))
                         {
-                            // Change this later to support overloaded methods
-                            resource = ReflectionUtility.GenerateResource(compiler._state.externalTarget, prev.text)[0];
-                            compiler._resourceTable.Add(name, resource);
+                            
                         }
 
 
-                        Datatype returnType = resource.GetOpCode(ref compiler._ibuffer, compiler._assembly, true);
-                        compiler._state.currentDatatype = returnType;
+                        
 
 
 

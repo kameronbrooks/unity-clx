@@ -97,40 +97,19 @@ namespace CLX
         /// <returns></returns>
         public static Program.Resource GenerateResource(Type target, MethodInfo method)
         {
-            Delegate del = MethodToOpenDelegate(target, method);
-            ParameterInfo[] argInfo = method.GetParameters();
-            Program.Resource output = new Program.Resource(del, argInfo.Length+1);
-            output.returnType = method.ReturnType;
-            output.name = target.FullName + "." + method.Name;
-            output.memberType = MemberTypes.Method;
-            return output;
+            
+            return null;
         }
 
         public static Program.Resource GenerateResource(Type target, PropertyInfo prop)
         {
-            Delegate getDel = prop.CanRead ? MethodToOpenDelegate(target, prop.GetGetMethod()) : null;
-            Delegate setDel = prop.CanWrite ? MethodToOpenDelegate(target, prop.GetSetMethod()) : null;
-            Program.Resource output = new Program.Resource(getDel, setDel, 2,3);
-            output.returnType = prop.PropertyType;
-            output.name = target.FullName + "." + prop.Name;
-            output.memberType = MemberTypes.Property;
-            return output;
+            return null;
         }
 
         public static Program.Resource GenerateResource(Type target, FieldInfo field)
         {
-            MethodInfo getMethod = field.GetType().GetMethod("GetValue");
-            Delegate getDel = MethodToInstanceDelegate(field, getMethod);
             
-            MethodInfo setMethod = field.GetType().GetMethod("SetValue",new Type[] { typeof(object), typeof(object) });
-            Delegate setDel = MethodToInstanceDelegate(field, setMethod);
-
-            Program.Resource output = new Program.Resource(getDel, setDel, 2,3);
-            output.returnType = field.FieldType;
-            output.name = target.FullName + "." + field.Name;
-            output.memberType = MemberTypes.Field;
-
-            return output;
+            return null;
         }
 
         public static Program.Resource GenerateResource(Type target, MemberInfo member)

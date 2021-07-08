@@ -149,16 +149,8 @@ namespace CLX
                                 *(int*)data = ((Node)c.reference).index;
                             }    
                             break;
-                        case OpCode.Call_API_bool:
-                        case OpCode.Call_API_i32:
-                        case OpCode.Call_API_f32:
-                        case OpCode.Call_API_obj:
-                        case OpCode.Call_API_void:
-                        case OpCode.Call_Ext_bool:
-                        case OpCode.Call_Ext_i32:
-                        case OpCode.Call_Ext_f32:
-                        case OpCode.Call_Ext_obj:
-                        case OpCode.Call_Ext_void:
+                        case OpCode.Call_API:
+                        case OpCode.Call_Extern:
                             fixed (byte* data = c.instruction.data)
                             {
                                 *(int*)data = ((Program.Resource)c.reference).id;
