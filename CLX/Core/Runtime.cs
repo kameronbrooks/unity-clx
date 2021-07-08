@@ -20,12 +20,14 @@ namespace CLX
         public byte[] _stack;
         int _stackSize;
         Heap _dynamicHeap;
+        Stack<object> _objectStack;
 
         public Thread(int stackSize)
         {
             _stackSize = stackSize;
             _stack = new byte[_stackSize];
             _dynamicHeap = new Heap();
+            _objectStack = new Stack<object>();
         }
 
         /// <summary>
@@ -42,6 +44,11 @@ namespace CLX
                 _stackSize = program.minStackSize;
                 _stack = new byte[_stackSize];
             }
+            // if there is an api target add it to the heap
+            if (apiTarget != null)
+            {
+                _dynamicHeap.NewObject(apiTarget, null);
+            }
             // Main execution loop
             unsafe
             {
@@ -55,7 +62,11 @@ namespace CLX
                         byte* fp = sp;
                         // initialize instruction pointer
                         Instruction* ip = instructions;
-                        
+
+
+                        int temp0;
+                        Program.Resource resourceTarget;
+
                         bool continueLoop = true;
 #if SAFE_LOOP
                         int __safety__accum = 1000000;
@@ -269,7 +280,49 @@ namespace CLX
                                     ++ip;
                                     break;
                                 /* =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= */
-                                /* =-=-=-=-=-=-=-=-=-= Arithmetic  =-=-=-=-=-=-=-=-=-=-= */
+                                /* =-=-=-=-=-=-=-=-=-=      IO     =-=-=-=-=-=-=-=-=-=-= */
+                                /* =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= */
+                                case OpCode.Push_API:
+                                    _objectStack.Push(apiTarget);
+                                    ++ip;
+                                    break;
+                                case OpCode.Call_API_bool:
+                                    *((bool*)(sp--)) = program.resources[*(int*)ip->data].Invoke<bool>(apiTarget);
+                                    ++ip;
+                                    break;
+                                case OpCode.Call_API_i32:
+                                    *((int*)(sp -= SIZE_INT32)) = program.resources[*(int*)ip->data].Invoke<int>(apiTarget);
+                                    ++ip;
+                                    break;
+                                case OpCode.Call_API_f32:
+                                    *((float*)(sp -= SIZE_INT32)) = program.resources[*(int*)ip->data].Invoke<float>(apiTarget);
+                                    ++ip;
+                                    break;
+                                case OpCode.Call_API_obj:
+                                    _objectStack.Push(program.resources[*(int*)ip->data].Invoke<object>(apiTarget));
+                                    ++ip;
+                                    break;
+                                case OpCode.Push_Ext_Arg0:
+                                    /*
+                                    program.resources[*(int*)ip->data].args0[0] = _dynamicHeap.Get(*((int*)(sp))).ptr;
+                                    sp += SIZE_INT32;
+                                    */
+                                    // using a separate object stack for now
+                                    resourceTarget = program.resources[*(int*)ip->data];
+                                    resourceTarget.args0[0] = _objectStack.Pop();
+                                    ++ip;
+                                    break;
+                                case OpCode.Push_Ext_Arg_Obj:
+                                    program.resources[*(int*)ip->data].args0[*(int*)(ip->data + sizeof(int))] = _dynamicHeap.Get(*((int*)(sp))).ptr;
+                                    sp += SIZE_INT32;
+                                    ++ip;
+                                    break;
+                                case OpCode.Call_Ext_i32:
+                                    program.resources[*(int*)ip->data].Invoke<int>(_objectStack.Pop());
+                                    ++ip;
+                                    break;
+                                /* =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= */
+                                /* =-=-=-=-=-=-=-=-=-= Print       =-=-=-=-=-=-=-=-=-=-= */
                                 /* =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= */
                                 case OpCode.Prnt_bool:
                                     Debug.Log(*((bool*)(sp)) ? "true" : "false");

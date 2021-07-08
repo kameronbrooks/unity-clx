@@ -109,6 +109,11 @@ namespace CLX
                         }
 
 
+                        Datatype returnType = resource.GetOpCode(ref compiler._ibuffer, compiler._assembly, true);
+                        compiler._state.currentDatatype = returnType;
+
+
+
                         
                     }
                     // We dont know what this thing is

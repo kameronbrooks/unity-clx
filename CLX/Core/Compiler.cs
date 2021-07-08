@@ -246,6 +246,13 @@ namespace CLX
                     *(int*)data = (sizeof(byte**) + sizeof(Instruction*)) + _state.localVariableBytes;
                 }
             }
+            // Add resources to program
+            int index = 0;
+            foreach(var resource in _resourceTable.Values)
+            {
+                resource.id = index;
+                _program.resources.Add(resource);
+            }
             // Add the terminate program so that the thread terminates
             _ibuffer.Add(new Instruction(OpCode.Term));
             // add the instructions to the program

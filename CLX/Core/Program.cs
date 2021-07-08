@@ -10,12 +10,31 @@ namespace CLX
         public class Resource
         {
             public string name;
-            System.Delegate[] func;
+            public System.Delegate[] func;
             public object[] args0;
             public object[] args1;
             public System.Type returnType;
             public int id;
             public MemberTypes memberType;
+
+            public bool isWritable
+            {
+                get
+                {
+                    if(memberType == MemberTypes.Field)
+                    {
+                        return true;
+                    }
+                    else if(memberType == MemberTypes.Property && func[1] != null)
+                    {
+                        return true;
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                }
+            }
 
             public Resource(System.Delegate f, int argCount)
             {
@@ -65,12 +84,53 @@ namespace CLX
                 args0[3] = arg2;
                 return (T)func[0].DynamicInvoke(args0);
             }
+
+            public Datatype GetOpCode(ref InstructionBuffer buffer, Assembly asm, bool isAPITarget = false)
+            {
+                Datatype dt = asm.FromCSharpType(returnType);
+                InstructionBuffer.Node node = null;
+                if(isAPITarget)
+                {
+                    switch(dt.id)
+                    {
+                        case Datatype.TYPEID_INT:
+                            node = buffer.Add(OpCode.Call_API_i32, 0);
+                            break;
+                        default:
+                            node = buffer.Add(OpCode.Call_API_obj, 0);
+                            break;
+                    }
+                }
+                else
+                {
+                    switch (dt.id)
+                    {
+                        case Datatype.TYPEID_INT:
+                            node = buffer.Add(OpCode.Call_Ext_i32, 0);
+                            break;
+                        default:
+                            node = buffer.Add(OpCode.Call_Ext_obj, 0);
+                            break;
+                    }
+                }
+
+                node.reference = this;
+
+                return dt;
+                
+            }
         }
 
         public List<Resource> resources;
         public object[] constObjects;
         public Instruction[] instructions;
         public int minStackSize;
+
+        public Program()
+        {
+            resources = new List<Resource>();
+            minStackSize = 512;
+        }
     }
 
 }

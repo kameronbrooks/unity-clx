@@ -288,6 +288,44 @@ namespace CLX
             }
         }
 
+        /// <summary>
+        /// Gets the clx datatype that corresponds to the given csharp type
+        /// If one does not exist, it will create a new object type and return that
+        /// The new object type will be added to the assembly at the global level
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        public Datatype FromCSharpType(System.Type type)
+        {
+            if(type == typeof(int))
+            {
+                return GetDataType("int");
+            }
+            else if (type == typeof(float))
+            {
+                return GetDataType("float");
+            }
+            else if (type == typeof(bool))
+            {
+                return GetDataType("bool");
+            }
+            else if (type == typeof(string))
+            {
+                return GetDataType("string");
+            }
+            else
+            {
+
+                string name = $"object_{type.FullName}";
+                Datatype dt = null;
+                if(!TryGetDatatype(name, out dt))
+                {
+                    dt = new Datatype_Object(this, type);
+                    _global.AddDatatype(dt, name);
+                }
+                return dt;
+            }
+        }
 
 
         
