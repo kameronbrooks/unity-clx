@@ -320,7 +320,11 @@ namespace CLX
                         compiler._state.localVariableBytes += datatype.byteSize;
                     }
 
-                    
+                    if(compiler.LookAhead(Token.TokenType.Assign))
+                    {
+                        compiler.BackStep();
+                        compiler.Step_Assignment.Execute();
+                    }
 
                 }
                 else

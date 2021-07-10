@@ -18,7 +18,7 @@ public class TestEditor : Editor
         ((Test)target).script = EditorGUILayout.TextArea(((Test)target).script, GUILayout.ExpandWidth(true), GUILayout.Height(500));
         if(GUILayout.Button("Run", GUILayout.Width(50)))
         {
-            ((Test)target).RunTest1();
+            ((Test)target).RunTest2();
         }
     }
 }
