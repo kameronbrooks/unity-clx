@@ -108,65 +108,62 @@ namespace CLX
             {
                 Program.Resource output = new Program.Resource()
                 {
-                    func = api.Method(method.Name, args),
+                    func = new CSharpAPI.API_CALL[] { api.Method(method.Name, args) },
                     name = method.Name,
-                    memberType = MemberTypes.Method
+                    memberType = MemberTypes.Method,
+                    args = args,
+                    returnType = method.ReturnType
                 };
             }
             return null;
         }
 
-        public static Program.Resource[] GenerateResource(Type target, PropertyInfo prop)
+        public static Program.Resource GenerateResource(Type target, PropertyInfo prop)
         {
-            Program.Resource[] output = new Program.Resource[2];
+            Program.Resource output = new Program.Resource()
+            {
+                name = prop.Name,
+                func = new CSharpAPI.API_CALL[2],
+                memberType = MemberTypes.Property,
+                returnType = prop.PropertyType
+            };
+
             CSharpAPI api = target.FindAPI();
             if (api != null)
             {
-                output[0] = new Program.Resource()
-                {
-                    func = api.GetField(prop.Name),
-                    name = prop.Name + "_get",
-                    memberType = MemberTypes.Property
-                };
-                output[1] = new Program.Resource()
-                {
-                    func = api.SetField(prop.Name),
-                    name = prop.Name + "_set",
-                    memberType = MemberTypes.Property
-                };
+                output.func[0] = api.GetField(prop.Name);
+                output.func[1] = api.SetField(prop.Name);
 
             }
             return output;
         }
 
-        public static Program.Resource[] GenerateResource(Type target, FieldInfo field)
+        public static Program.Resource GenerateResource(Type target, FieldInfo field)
         {
-            Program.Resource[] output = new Program.Resource[2];
-            CSharpAPI api = target.FindAPI();
-            if(api != null)
+            Program.Resource output = new Program.Resource()
             {
-                output[0] = new Program.Resource()
-                {
-                    func = api.GetField(field.Name),
-                    name = field.Name + "_get",
-                    memberType = MemberTypes.Field
-                };
-                output[1] = new Program.Resource()
-                {
-                    func = api.SetField(field.Name),
-                    name = field.Name + "_set",
-                    memberType = MemberTypes.Field
-                };
+                name = field.Name,
+                func = new CSharpAPI.API_CALL[2],
+                memberType = MemberTypes.Property,
+                returnType = field.FieldType
+                
+            };
+
+            CSharpAPI api = target.FindAPI();
+            if (api != null)
+            {
+                output.func[0] = api.GetField(field.Name);
+                output.func[1] = api.SetField(field.Name);
 
             }
             return output;
         }
 
-        public static Program.Resource[] GenerateResource(Type target, MemberInfo member)
+        public static Program.Resource GenerateResource(Type target, MemberInfo member)
         {
             if(member.MemberType == MemberTypes.Method)
             {
-                return new Program.Resource[] {GenerateResource(target, (MethodInfo)member) };
+                return GenerateResource(target, (MethodInfo)member);
             }
             else if (member.MemberType == MemberTypes.Property)
             {
@@ -182,15 +179,15 @@ namespace CLX
             }
         }
 
-        public static Program.Resource[] GenerateResource(Type target, string name)
+        public static Program.Resource GenerateResource(Type target, string name)
         {
             List<Program.Resource> output = new List<Program.Resource>();
             MemberInfo[] members = GetMemberInfo(target, name);
-            for(int i = 0; i < members.Length; ++i)
+            if(members.Length == 1)
             {
-                output.AddRange(GenerateResource(target, members[i]));
+                return GenerateResource(target, members[0]);
             }
-            return output.ToArray();
+            return null;
         }
 
         public static string GetUniqueName(MethodInfo method)

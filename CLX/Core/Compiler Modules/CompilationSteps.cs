@@ -103,20 +103,26 @@ namespace CLX
                         string name = compiler._state.externalTarget.FullName + "." + prev.text;
                         Program.Resource resource = null;
                         // Check if resource already exists
-                        if(
-                            !compiler._resourceTable.TryGetValue(name, out resource) &&                 // Search for name
-                            !compiler._resourceTable.TryGetValue(name + "_get", out resource) &&        // Search for name_get (if prop or field)
-                            !compiler._resourceTable.TryGetValue(name + "_set", out resource))          // Search for name_set (if prop or field)
+                        if(!compiler._resourceTable.TryGetValue(name, out resource))
                         {
+                            // Add generate the resource and specify its index
+                            resource = ReflectionUtility.GenerateResource(compiler._state.externalTarget, prev.text);
+                            resource.id = compiler._resourceTable.Count;
+                            // Add to the resource table
+                            compiler._resourceTable.Add(name, resource);
                             
                         }
 
+                        compiler._state.currentLRReference = new State.Reference
+                        {
+                            reftype = State.Reference.RefType.API,
+                            index = resource.id,
+                            datatype = compiler._assembly.FromCSharpType(resource.returnType)
+                        };
+                        compiler._state.currentDatatype = compiler._state.currentLRReference.datatype;
 
-                        
 
 
-
-                        
                     }
                     // We dont know what this thing is
                     else
@@ -273,12 +279,12 @@ namespace CLX
 
                     if (compiler._state.HasLRValueRef())
                     {
-                        compiler._state.CollapseCurrentRef(ref compiler._ibuffer, true);;
+                        compiler._state.CollapseCurrentRef(ref compiler._ibuffer, true);
                     }
 
-                    lref.datatype.GetStoreInstructions(ref compiler._ibuffer, lref);
+                    lref.GetStoreInstructions(ref compiler._ibuffer);
                     compiler._state.currentDatatype = lref.datatype;
-                    compiler._state.currentDatatype = null;
+                    
 
                 }
                 return true;

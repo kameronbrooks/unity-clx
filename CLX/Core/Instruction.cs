@@ -62,9 +62,10 @@ namespace CLX
         /* =-=-= IO =-=-= */
         Push_API,
  
-        Call_API,
-        Call_Extern,
-        
+        Call_API_Get,
+        Call_Extern_Get,
+        Call_API_Set,
+        Call_Extern_Set,
 
         /* =-=-= Conv =-=-= */
         Conv_i32_f32,

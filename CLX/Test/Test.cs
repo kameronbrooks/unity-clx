@@ -71,6 +71,14 @@ public class Test : MonoBehaviour
 
         public override unsafe API_CALL SetField(string name)
         {
+            if (name == "field1")
+            {
+                return (a, b) =>
+                {
+                    ((TestClass)b.Pop()).field1 = *((int*)(*a));
+                    (*a) += 4;
+                };
+            }
             throw new System.Exception($"Unsupported api call {name} in api_class {this.targetType.Name}");
         }
 
@@ -99,13 +107,11 @@ public class Test : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        RunTest1();
+        RunTest2();
         
     }
 
-    
-
-
+   
     public void RunTest1()
     {
         Runtime runtime = new Runtime();
@@ -133,6 +139,28 @@ public class Test : MonoBehaviour
         watch.Stop();
         Debug.Log($"Control Time: {elapsed.TotalMilliseconds}ms");
         Debug.Log(i);
+    }
+
+    public void RunTest2()
+    {
+        Runtime runtime = new Runtime();
+
+        InstructionBuffer buffer = new InstructionBuffer();
+
+
+
+        Compiler compiler = new Compiler();
+        Program prog = compiler.Compile(script, typeof(TestClass));
+        //Debug.Log(prog.ToString());
+        Thread thread = new Thread(512);
+
+        TestClass testTarget = new TestClass();
+
+        System.Diagnostics.Stopwatch watch = System.Diagnostics.Stopwatch.StartNew();
+        thread.Execute(prog, testTarget);
+        System.TimeSpan elapsed = watch.Elapsed;
+        watch.Stop();
+        Debug.Log($"CLX Time: {elapsed.TotalMilliseconds}ms");
     }
 
     //[MethodImpl(MethodImplOptions.NoOptimization | MethodImplOptions.NoInlining)]

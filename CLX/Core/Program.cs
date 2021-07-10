@@ -10,10 +10,11 @@ namespace CLX
         public class Resource
         {
             public MemberTypes memberType;
+            public System.Type returnType;
             public string name;
             public int id;
             public object[] args;
-            public CSharpAPI.API_CALL func;
+            public CSharpAPI.API_CALL[] func;
 
         }
 

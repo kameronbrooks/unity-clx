@@ -14,15 +14,42 @@ namespace CLX
         {
             public class Reference
             {
-                public enum RefType { Local, Arg, Reg, Elem }
+                public enum RefType { Local, Arg, Reg, Elem, API }
                 public RefType reftype;
                 public Datatype datatype;
                 public int offset;
                 public int index;
 
-                public bool Close(ref InstructionBuffer buffer)
+                public void GetStoreInstructions(ref InstructionBuffer buffer)
                 {
-                    return true;
+                    switch (reftype)
+                    {
+                        case RefType.Local:
+                        case RefType.Reg:
+                            datatype.GetStoreInstructions(ref buffer, this);
+                            break;
+                        case RefType.API:
+                            buffer.Add(OpCode.Call_API_Set, index);
+                            break;
+                        default:
+                            throw new Exception($"Trying to collapse unsupported reference type {reftype}");
+                    }
+                }
+                public void GetLoadInstructions(ref InstructionBuffer buffer)
+                {
+                    switch (reftype)
+                    {
+                        case RefType.Local:
+                        case RefType.Reg:
+                            datatype.GetLoadInstructions(ref buffer, this);
+                            break;
+                        case RefType.API:
+                            buffer.Add(OpCode.Call_API_Get, index);
+                            break;
+                        default:
+                            throw new Exception($"Trying to collapse unsupported reference type {reftype}");
+                    }
+                    
                 }
             }
             public class Substate
@@ -141,7 +168,7 @@ namespace CLX
             }
 
             /// <summary>
-            /// Collapses the current lr value into either an l (write) or an r (read)
+            /// Collapses the current lr value into an r (read) or removes it
             /// </summary>
             /// <param name="buffer"></param>
             /// <param name="read"></param>
@@ -149,13 +176,15 @@ namespace CLX
             public Reference CollapseCurrentRef(ref InstructionBuffer buffer, bool read = true)
             {
                 Reference output = _frames.Peek().lvalueReference;
-                if (read)
+                if(read)
                 {
-                    _frames.Peek().lvalueReference.datatype.GetLoadInstructions(ref buffer, _frames.Peek().lvalueReference);
-                }
+                    output.GetLoadInstructions(ref buffer);
+                }              
                 _frames.Peek().lvalueReference = null;
                 return output;
             }
+
+            
 
             public State()
             {
@@ -248,10 +277,12 @@ namespace CLX
             }
             // Add resources to program
             int index = 0;
+            // The resources should already have the correct indices, so we need to make sure that they go into the program in the proper order
+            _program.resources = new List<Program.Resource>(new Program.Resource[_resourceTable.Count]);
             foreach(var resource in _resourceTable.Values)
             {
-                resource.id = index;
-                _program.resources.Add(resource);
+                Debug.Log($"Adding resource {resource.name} at {resource.id}");
+                _program.resources[resource.id] = resource;
             }
             // Add the terminate program so that the thread terminates
             _ibuffer.Add(new Instruction(OpCode.Term));

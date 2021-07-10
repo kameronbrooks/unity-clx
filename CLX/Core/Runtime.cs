@@ -286,13 +286,22 @@ namespace CLX
                                     _objectStack.Push(apiTarget);
                                     ++ip;
                                     break;
-                                case OpCode.Call_API:
+                                case OpCode.Call_API_Get:
                                     _objectStack.Push(apiTarget);
-                                    program.resources[*(int*)ip->data].func(&sp,_objectStack);
+                                    program.resources[*(int*)ip->data].func[0](&sp,_objectStack);
                                     ++ip;
                                     break;
-                                case OpCode.Call_Extern:
-                                    program.resources[*(int*)ip->data].func(&sp, _objectStack);
+                                case OpCode.Call_Extern_Get:
+                                    program.resources[*(int*)ip->data].func[0](&sp, _objectStack);
+                                    ++ip;
+                                    break;
+                                case OpCode.Call_API_Set:
+                                    _objectStack.Push(apiTarget);
+                                    program.resources[*(int*)ip->data].func[1](&sp, _objectStack);
+                                    ++ip;
+                                    break;
+                                case OpCode.Call_Extern_Set:
+                                    program.resources[*(int*)ip->data].func[1](&sp, _objectStack);
                                     ++ip;
                                     break;
 

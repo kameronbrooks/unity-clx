@@ -149,12 +149,14 @@ namespace CLX
                                 *(int*)data = ((Node)c.reference).index;
                             }    
                             break;
-                        case OpCode.Call_API:
-                        case OpCode.Call_Extern:
+                        case OpCode.Call_API_Get:
+                        case OpCode.Call_Extern_Get:
+                            /*
                             fixed (byte* data = c.instruction.data)
                             {
                                 *(int*)data = ((Program.Resource)c.reference).id;
                             }
+                            */
                             break;
                         default:
                             break;

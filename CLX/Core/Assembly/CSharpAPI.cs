@@ -58,7 +58,7 @@ namespace CLX
                 }
                 else
                 {
-
+                    throw new System.Exception($"The member {name} was not found in the class {targetType.FullName}");
                 }
 
             }
