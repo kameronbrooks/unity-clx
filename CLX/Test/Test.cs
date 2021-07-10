@@ -38,66 +38,18 @@ public class Test : MonoBehaviour
     [CLXAPIClass(typeof(TestClass))]
     class TestClassAPI : CSharpAPI
     {
-        public override unsafe API_CALL GetField(string name)
+
+        [CLX.APIMethod]
+        public unsafe void field1_get(byte** sp, Stack<object> os)
         {
-            if(name == "field1")
-            {
-                return (a, b) =>
-                {
-                    *((int*)(*a -= 4)) = ((TestClass)b.Pop()).field1;
-                };
-            }
-
-            throw new System.Exception($"Unsupported api call {name} in api_class {this.targetType.Name}");
+            *((int*)(*sp -= 4)) = ((TestClass)os.Pop()).field1;
         }
-
-        public override unsafe API_CALL GetProperty(string name)
+        [CLX.APIMethod]
+        public unsafe void field1_set(byte** sp, Stack<object> os)
         {
-            if (name == "prop1")
-            {
-                return (a, b) =>
-                {
-                    *((int*)(*a -= 4)) = ((TestClass)b.Pop()).prop1;
-                };
-            }
-
-            throw new System.Exception($"Unsupported api call {name} in api_class {this.targetType.Name}");
+            ((TestClass)os.Pop()).field1 = *((int*)(*sp));
+            (*sp) += 4;
         }
-
-        public override unsafe API_CALL Method(string name, params System.Type[] signature)
-        {
-            throw new System.Exception($"Unsupported api call {name} in api_class {this.targetType.Name}");
-        }
-
-        public override unsafe API_CALL SetField(string name)
-        {
-            if (name == "field1")
-            {
-                return (a, b) =>
-                {
-                    ((TestClass)b.Pop()).field1 = *((int*)(*a));
-                    (*a) += 4;
-                };
-            }
-            throw new System.Exception($"Unsupported api call {name} in api_class {this.targetType.Name}");
-        }
-
-        public override unsafe API_CALL SetProperty(string name)
-        {
-            if (name == "prop1")
-            {
-                return (a, b) =>
-                {
-                    ((TestClass)b.Pop()).prop1 = *((int*)*a);
-                    *a += 4;
-                };
-            }
-
-            throw new System.Exception($"Unsupported api call {name} in api_class {this.targetType.Name}");
-        }
-
-        
-            
     }
 
 

@@ -27,14 +27,47 @@ namespace CLX
                 return GetType().GetCustomAttribute<CLXAPIClass>().type;
             }
         }
+        /// <summary>
+        /// Returns the API_CALL with the matching name that is a member of this API Class
+        /// Uses reflection to look at the members of this class and find the matching one with the attribute APIMethod
+        /// The signature for the method must be void API_CALL(byte** sp, Stack<object> os)
+        /// Method must me marked as unsafe
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        protected API_CALL GetMemberAPI_CALL(string name)
+        {
+            MethodInfo method = this.GetType().GetMethod(name);
+            if (method.GetCustomAttribute<APIMethod>() != null)
+            {
+                return (API_CALL)method.CreateDelegate(typeof(API_CALL), this);
+            }
+            return null;
+        }
 
-
-
-        public abstract API_CALL GetField(string name);
-        public abstract API_CALL SetField(string name);
-        public abstract API_CALL GetProperty(string name);
-        public abstract API_CALL SetProperty(string name);
-        public abstract API_CALL Method(string name, params System.Type[] signature);
+        public virtual API_CALL[] Field(string name)
+        {
+            return new API_CALL[2]
+            {
+                GetMemberAPI_CALL(name + "_get"),
+                GetMemberAPI_CALL(name + "_set")
+            };
+        }
+        public virtual API_CALL[] Property(string name)
+        {
+            return new API_CALL[2]
+            {
+                GetMemberAPI_CALL(name + "_get"),
+                GetMemberAPI_CALL(name + "_set")
+            };
+        }
+        public virtual API_CALL[] Method(string name)
+        {
+            return new API_CALL[]
+            {
+                GetMemberAPI_CALL(name)
+            };
+        }
 
         public API_CALL[] GetMember(string name)
         {
@@ -44,17 +77,15 @@ namespace CLX
             {
                 if(member.MemberType == MemberTypes.Field)
                 {
-                    apicalls.Add(GetField(name));
-                    apicalls.Add(SetField(name));
+                    apicalls.AddRange(Field(name));
                 }
                 else if (member.MemberType == MemberTypes.Property)
                 {
-                    apicalls.Add(GetProperty(name));
-                    apicalls.Add(SetProperty(name));
+                    apicalls.AddRange(Property(name));
                 }
                 else if (member.MemberType == MemberTypes.Method)
                 {
-                    apicalls.Add(Method(name));
+                    apicalls.AddRange(Method(name));
                 }
                 else
                 {
@@ -64,6 +95,8 @@ namespace CLX
             }
             return apicalls.ToArray();
         }
+
+
 
     }
 

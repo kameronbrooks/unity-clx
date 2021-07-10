@@ -108,7 +108,7 @@ namespace CLX
             {
                 Program.Resource output = new Program.Resource()
                 {
-                    func = new CSharpAPI.API_CALL[] { api.Method(method.Name, args) },
+                    func = api.Method(method.Name),
                     name = method.Name,
                     memberType = MemberTypes.Method,
                     args = args,
@@ -131,9 +131,7 @@ namespace CLX
             CSharpAPI api = target.FindAPI();
             if (api != null)
             {
-                output.func[0] = api.GetField(prop.Name);
-                output.func[1] = api.SetField(prop.Name);
-
+                output.func = api.Property(prop.Name);
             }
             return output;
         }
@@ -152,9 +150,7 @@ namespace CLX
             CSharpAPI api = target.FindAPI();
             if (api != null)
             {
-                output.func[0] = api.GetField(field.Name);
-                output.func[1] = api.SetField(field.Name);
-
+                output.func = api.Field(field.Name);
             }
             return output;
         }
