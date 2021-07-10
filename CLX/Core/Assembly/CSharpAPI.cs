@@ -28,13 +28,42 @@ namespace CLX
             }
         }
 
+
+
         public abstract API_CALL GetField(string name);
         public abstract API_CALL SetField(string name);
         public abstract API_CALL GetProperty(string name);
         public abstract API_CALL SetProperty(string name);
-        public abstract API_CALL Method(string name);
+        public abstract API_CALL Method(string name, params System.Type[] signature);
 
-        
+        public API_CALL[] GetMember(string name)
+        {
+            List<API_CALL> apicalls = new List<API_CALL>();
+            MemberInfo[] memberInfo = targetType.GetMember(name);
+            foreach(var member in memberInfo)
+            {
+                if(member.MemberType == MemberTypes.Field)
+                {
+                    apicalls.Add(GetField(name));
+                    apicalls.Add(SetField(name));
+                }
+                else if (member.MemberType == MemberTypes.Property)
+                {
+                    apicalls.Add(GetProperty(name));
+                    apicalls.Add(SetProperty(name));
+                }
+                else if (member.MemberType == MemberTypes.Method)
+                {
+                    apicalls.Add(Method(name));
+                }
+                else
+                {
+
+                }
+
+            }
+            return apicalls.ToArray();
+        }
 
     }
 

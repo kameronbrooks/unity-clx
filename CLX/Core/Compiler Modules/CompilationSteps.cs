@@ -99,10 +99,14 @@ namespace CLX
                     // Check to see if we are referencing an api member
                     else if (compiler._state.externalTarget != null || ReflectionUtility.HasMember(compiler._state.externalTarget, prev.text))
                     {
+                        
                         string name = compiler._state.externalTarget.FullName + "." + prev.text;
                         Program.Resource resource = null;
                         // Check if resource already exists
-                        if(!compiler._resourceTable.TryGetValue(name, out resource))
+                        if(
+                            !compiler._resourceTable.TryGetValue(name, out resource) &&                 // Search for name
+                            !compiler._resourceTable.TryGetValue(name + "_get", out resource) &&        // Search for name_get (if prop or field)
+                            !compiler._resourceTable.TryGetValue(name + "_set", out resource))          // Search for name_set (if prop or field)
                         {
                             
                         }

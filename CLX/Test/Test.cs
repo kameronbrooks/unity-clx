@@ -44,7 +44,7 @@ public class Test : MonoBehaviour
             {
                 return (a, b) =>
                 {
-                    *((int*)*a) = ((TestClass)b.Pop()).field1;
+                    *((int*)(*a -= 4)) = ((TestClass)b.Pop()).field1;
                 };
             }
 
@@ -57,14 +57,14 @@ public class Test : MonoBehaviour
             {
                 return (a, b) =>
                 {
-                    *((int*)*a) = ((TestClass)b.Pop()).prop1;
+                    *((int*)(*a -= 4)) = ((TestClass)b.Pop()).prop1;
                 };
             }
 
             throw new System.Exception($"Unsupported api call {name} in api_class {this.targetType.Name}");
         }
 
-        public override unsafe API_CALL Method(string name)
+        public override unsafe API_CALL Method(string name, params System.Type[] signature)
         {
             throw new System.Exception($"Unsupported api call {name} in api_class {this.targetType.Name}");
         }
@@ -81,11 +81,14 @@ public class Test : MonoBehaviour
                 return (a, b) =>
                 {
                     ((TestClass)b.Pop()).prop1 = *((int*)*a);
+                    *a += 4;
                 };
             }
 
             throw new System.Exception($"Unsupported api call {name} in api_class {this.targetType.Name}");
         }
+
+        
             
     }
 
