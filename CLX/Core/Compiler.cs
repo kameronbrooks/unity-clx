@@ -19,6 +19,7 @@ namespace CLX
                 public Datatype datatype;
                 public int offset;
                 public int index;
+                public bool isCallable;
 
                 public void GetStoreInstructions(ref InstructionBuffer buffer)
                 {
@@ -54,10 +55,22 @@ namespace CLX
             }
             public class Substate
             {
+                /// <summary>
+                /// Currently referenced datatype
+                /// </summary>
                 public Datatype currentDatatype;
                 public Reference lvalueReference;
+                /// <summary>
+                /// How many bytes are required for local variables in the current scope
+                /// </summary>
                 public int localVariableBytes;
+                /// <summary>
+                /// What is the current scope
+                /// </summary>
                 public Scope currentScope;
+                /// <summary>
+                /// What is the api target type
+                /// </summary>
                 public Type externalTarget;
 
                 public Substate Copy()

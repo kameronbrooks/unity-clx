@@ -33,22 +33,38 @@ public class Test : MonoBehaviour
         {
 
         }
+
+        public Vector3 GetVector()
+        {
+            return new Vector3();
+        }
+
+        public TestClass()
+        {
+            field1 = 111;
+        }
     }
 
     [CLXAPIClass(typeof(TestClass))]
     class TestClassAPI : CSharpAPI
     {
-
-        [CLX.APIMethod]
-        public unsafe void field1_get(byte** sp, Stack<object> os)
+        [APIMethod]
+        public unsafe void field1_get(byte** sp, ObjectStack os)
         {
             *((int*)(*sp -= 4)) = ((TestClass)os.Pop()).field1;
         }
-        [CLX.APIMethod]
-        public unsafe void field1_set(byte** sp, Stack<object> os)
+
+        [APIMethod]
+        public unsafe void field1_set(byte** sp, ObjectStack os)
         {
             ((TestClass)os.Pop()).field1 = *((int*)(*sp));
             (*sp) += 4;
+        }
+
+        [APIMethod]
+        public unsafe void GetVector(byte** sp, ObjectStack os)
+        {
+            *((Vector3*)(sp -= sizeof(Vector3))) = new Vector3();
         }
     }
 

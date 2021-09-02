@@ -97,6 +97,7 @@ namespace CLX
         /// <returns></returns>
         public static Program.Resource GenerateResource(Type target, MethodInfo method)
         {
+            Debug.Log($"Generating Method Resource: {target.FullName}::{method.Name}");
             CSharpAPI api = target.FindAPI();
             ParameterInfo[] parameters = method.GetParameters();
             Type[] args = new Type[parameters.Length];
@@ -114,12 +115,15 @@ namespace CLX
                     args = args,
                     returnType = method.ReturnType
                 };
+
+                return output;
             }
             return null;
         }
 
         public static Program.Resource GenerateResource(Type target, PropertyInfo prop)
         {
+            Debug.Log($"Generating Property Resource: {target.FullName}::{prop.Name}");
             Program.Resource output = new Program.Resource()
             {
                 name = prop.Name,
@@ -177,8 +181,10 @@ namespace CLX
 
         public static Program.Resource GenerateResource(Type target, string name)
         {
+            Debug.Log($"Generating resource {target.FullName}::{name}");
             List<Program.Resource> output = new List<Program.Resource>();
             MemberInfo[] members = GetMemberInfo(target, name);
+            Debug.Log(members.Length);
             if(members.Length == 1)
             {
                 return GenerateResource(target, members[0]);

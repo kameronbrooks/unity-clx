@@ -66,6 +66,8 @@ namespace CLX
         Call_Extern_Get,
         Call_API_Set,
         Call_Extern_Set,
+        Call_API_FUNC_0,
+        Call_API_FUNC_1,
 
         /* =-=-= Conv =-=-= */
         Conv_i32_f32,

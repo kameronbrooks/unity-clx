@@ -18,7 +18,7 @@ namespace CLX
 
     public unsafe abstract class CSharpAPI
     {
-        public delegate void API_CALL(byte** sp, Stack<object> os);
+        public delegate void API_CALL(byte** sp, ObjectStack os);
 
         public System.Type targetType
         {
@@ -30,7 +30,7 @@ namespace CLX
         /// <summary>
         /// Returns the API_CALL with the matching name that is a member of this API Class
         /// Uses reflection to look at the members of this class and find the matching one with the attribute APIMethod
-        /// The signature for the method must be void API_CALL(byte** sp, Stack<object> os)
+        /// The signature for the method must be void API_CALL(byte** sp, ObjectStack os)
         /// Method must me marked as unsafe
         /// </summary>
         /// <param name="name"></param>
@@ -44,6 +44,24 @@ namespace CLX
             }
             return null;
         }
+        
+        public virtual void __Construct__(byte** sp, ObjectStack os)
+        {
+
+        }
+        public virtual void __Destruct__(byte** sp, ObjectStack os)
+        {
+
+        }
+        public virtual void __Load__(byte** sp, ObjectStack os)
+        {
+
+        }
+        public virtual void __Store__(byte** sp, ObjectStack os)
+        {
+
+        }
+
 
         public virtual API_CALL[] Field(string name)
         {
@@ -116,6 +134,7 @@ namespace CLX
                 {
                     if (apiclass.type == type)
                     {
+                        Debug.Log($" Found API for class {type.FullName} , API is {t.FullName}");
                         return (CSharpAPI)System.Activator.CreateInstance(t);
                     }
                 }

@@ -22,11 +22,13 @@ namespace CLX
         public object[] constObjects;
         public Instruction[] instructions;
         public int minStackSize;
+        public int minObjectStackSize;
 
         public Program()
         {
             resources = new List<Resource>();
             minStackSize = 512;
+            minObjectStackSize = 128;
         }
     }
 

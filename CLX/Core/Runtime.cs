@@ -20,14 +20,14 @@ namespace CLX
         public byte[] _stack;
         int _stackSize;
         Heap _dynamicHeap;
-        Stack<object> _objectStack;
+        ObjectStack _objectStack;
 
         public Thread(int stackSize)
         {
             _stackSize = stackSize;
             _stack = new byte[_stackSize];
             _dynamicHeap = new Heap();
-            _objectStack = new Stack<object>();
+            _objectStack = new ObjectStack(null);
         }
 
         /// <summary>
@@ -43,11 +43,15 @@ namespace CLX
             {
                 _stackSize = program.minStackSize;
                 _stack = new byte[_stackSize];
+                
             }
+            // set the api target for the object stack
+            _objectStack.apiTarget = apiTarget;
             // if there is an api target add it to the heap
             if (apiTarget != null)
             {
                 _dynamicHeap.NewObject(apiTarget, null);
+                
             }
             // Main execution loop
             unsafe
@@ -282,25 +286,23 @@ namespace CLX
                                 /* =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= */
                                 /* =-=-=-=-=-=-=-=-=-=      IO     =-=-=-=-=-=-=-=-=-=-= */
                                 /* =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= */
-                                case OpCode.Push_API:
-                                    _objectStack.Push(apiTarget);
-                                    ++ip;
-                                    break;
-                                case OpCode.Call_API_Get:
-                                    _objectStack.Push(apiTarget);
-                                    program.resources[*(int*)ip->data].func[0](&sp,_objectStack);
-                                    ++ip;
-                                    break;
+                                case OpCode.Call_API_FUNC_0:
                                 case OpCode.Call_Extern_Get:
                                     program.resources[*(int*)ip->data].func[0](&sp, _objectStack);
                                     ++ip;
                                     break;
-                                case OpCode.Call_API_Set:
-                                    _objectStack.Push(apiTarget);
+                                case OpCode.Call_API_FUNC_1:
+                                case OpCode.Call_Extern_Set:
                                     program.resources[*(int*)ip->data].func[1](&sp, _objectStack);
                                     ++ip;
                                     break;
-                                case OpCode.Call_Extern_Set:
+                                case OpCode.Call_API_Get:
+                                    _objectStack.PushAPIOntoStack();
+                                    program.resources[*(int*)ip->data].func[0](&sp, _objectStack);
+                                    ++ip;
+                                    break;
+                                case OpCode.Call_API_Set:
+                                    _objectStack.PushAPIOntoStack();
                                     program.resources[*(int*)ip->data].func[1](&sp, _objectStack);
                                     ++ip;
                                     break;

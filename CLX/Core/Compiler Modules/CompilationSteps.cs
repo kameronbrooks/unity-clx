@@ -97,19 +97,23 @@ namespace CLX
                         Debug.Log("LR Ref set " + compiler._state.currentLRReference);
                     }
                     // Check to see if we are referencing an api member
-                    else if (compiler._state.externalTarget != null || ReflectionUtility.HasMember(compiler._state.externalTarget, prev.text))
+                    else if (compiler._state.externalTarget != null)
                     {
-                        
+                        Debug.Log($"Checking for API METHOD {prev.text}");
                         string name = compiler._state.externalTarget.FullName + "." + prev.text;
+                        Debug.Log($"Full anem API METHOD {name}");
                         Program.Resource resource = null;
                         // Check if resource already exists
                         if(!compiler._resourceTable.TryGetValue(name, out resource))
                         {
+                            Debug.Log($"Existing resource for {name} not found");
                             // Add generate the resource and specify its index
                             resource = ReflectionUtility.GenerateResource(compiler._state.externalTarget, prev.text);
                             resource.id = compiler._resourceTable.Count;
                             // Add to the resource table
                             compiler._resourceTable.Add(name, resource);
+
+
                             
                         }
 
