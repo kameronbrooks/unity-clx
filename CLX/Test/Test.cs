@@ -66,6 +66,12 @@ public class Test : MonoBehaviour
         {
             *((Vector3*)(sp -= sizeof(Vector3))) = new Vector3();
         }
+
+        [APIMethod]
+        public unsafe void method1(byte** sp, ObjectStack os)
+        {
+            *((int*)(*sp -= 4)) = ((TestClass)os.Pop()).method1();
+        }
     }
 
 
@@ -128,7 +134,7 @@ public class Test : MonoBehaviour
         thread.Execute(prog, testTarget);
         System.TimeSpan elapsed = watch.Elapsed;
         watch.Stop();
-        Debug.Log($"CLX Time: {elapsed.TotalMilliseconds}ms");
+        Debug.Log($"CLX Time: {elapsed.TotalMilliseconds} ms");
     }
 
     //[MethodImpl(MethodImplOptions.NoOptimization | MethodImplOptions.NoInlining)]

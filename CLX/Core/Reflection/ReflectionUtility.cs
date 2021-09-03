@@ -181,6 +181,7 @@ namespace CLX
 
         public static Program.Resource GenerateResource(Type target, string name)
         {
+            /*
             Debug.Log($"Generating resource {target.FullName}::{name}");
             List<Program.Resource> output = new List<Program.Resource>();
             MemberInfo[] members = GetMemberInfo(target, name);
@@ -189,7 +190,17 @@ namespace CLX
             {
                 return GenerateResource(target, members[0]);
             }
-            return null;
+            */
+            List<Program.Resource> output = new List<Program.Resource>();
+            CSharpAPI api = target.FindAPI();
+
+            if(api == null)
+            {
+                Debug.Log($"No API found for type:{target.FullName}");
+                return null;
+            }
+
+            return api.GenerateResource(name);
         }
 
         public static string GetUniqueName(MethodInfo method)
@@ -215,6 +226,21 @@ namespace CLX
         public static string GetUniqueName(FieldInfo field)
         {
             return field.DeclaringType + "." + field.Name;
+        }
+
+        public static System.Type CreateFunctionType(params Type[] args)
+        {
+            return typeof(System.Func<>).MakeGenericType(args);
+        }
+        public static System.Type CreateFunctionType(Type returnType, params Type[] args)
+        {
+            Type[] totalParams = new Type[args.Length + 1];
+            totalParams[0] = returnType;
+            for(int i = 0; i < args.Length; ++i)
+            {
+                totalParams[i + 1] = args[i];
+            }
+            return typeof(System.Func<>).MakeGenericType(totalParams);
         }
 
 

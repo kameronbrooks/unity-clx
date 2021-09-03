@@ -275,6 +275,11 @@ namespace CLX
                                     sp += SIZE_INT32;
                                     ++ip;
                                     break;
+                                case OpCode.Pow_i32:
+                                    *((int*)(sp + SIZE_INT32)) = (int)Mathf.Pow(*((int*)(sp + SIZE_INT32)), *((int*)(sp)));
+                                    sp += SIZE_INT32;
+                                    ++ip;
+                                    break;
                                 case OpCode.Inc_i32:
                                     ++*((int*)(sp));
                                     ++ip;
@@ -286,21 +291,23 @@ namespace CLX
                                 /* =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= */
                                 /* =-=-=-=-=-=-=-=-=-=      IO     =-=-=-=-=-=-=-=-=-=-= */
                                 /* =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= */
-                                case OpCode.Call_API_FUNC_0:
+                                
                                 case OpCode.Call_Extern_Get:
                                     program.resources[*(int*)ip->data].func[0](&sp, _objectStack);
                                     ++ip;
                                     break;
-                                case OpCode.Call_API_FUNC_1:
+                                
                                 case OpCode.Call_Extern_Set:
                                     program.resources[*(int*)ip->data].func[1](&sp, _objectStack);
                                     ++ip;
                                     break;
+                                case OpCode.Call_API_FUNC_0:
                                 case OpCode.Call_API_Get:
                                     _objectStack.PushAPIOntoStack();
                                     program.resources[*(int*)ip->data].func[0](&sp, _objectStack);
                                     ++ip;
                                     break;
+                                case OpCode.Call_API_FUNC_1:
                                 case OpCode.Call_API_Set:
                                     _objectStack.PushAPIOntoStack();
                                     program.resources[*(int*)ip->data].func[1](&sp, _objectStack);

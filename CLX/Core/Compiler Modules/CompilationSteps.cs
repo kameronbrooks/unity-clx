@@ -43,7 +43,7 @@ namespace CLX
                     Token op = compiler.previous;
                     if (compiler._state.HasLRValueRef())
                     {
-                        compiler._state.CollapseCurrentRef(ref compiler._ibuffer, true);;
+                        compiler._state.CollapseCurrentRef(ref compiler._ibuffer, State.CollapseType.Read);
                     }
                     // Save this node incase we need to convert the lvalue
                     InstructionBuffer.Node savedNode = compiler._ibuffer.tail;
@@ -52,7 +52,7 @@ namespace CLX
 
                     if (compiler._state.HasLRValueRef())
                     {
-                        compiler._state.CollapseCurrentRef(ref compiler._ibuffer, true);;
+                        compiler._state.CollapseCurrentRef(ref compiler._ibuffer, State.CollapseType.Read);
                     }
                     Datatype rtype = compiler._state.currentDatatype;
 
@@ -117,12 +117,35 @@ namespace CLX
                             
                         }
 
-                        compiler._state.currentLRReference = new State.Reference
+                        if (resource.memberType == System.Reflection.MemberTypes.Method)
                         {
-                            reftype = State.Reference.RefType.API,
-                            index = resource.id,
-                            datatype = compiler._assembly.FromCSharpType(resource.returnType)
-                        };
+                            compiler._state.currentLRReference = new State.Reference
+                            {
+                                reftype = State.Reference.RefType.API_Method,
+                                index = resource.id,
+                                isCallable = true,
+                                datatype = compiler._assembly.FromCSharpType(ReflectionUtility.CreateFunctionType(resource.returnType))
+                            };
+                        } 
+                        else if (resource.memberType == System.Reflection.MemberTypes.Field)
+                        {
+                            compiler._state.currentLRReference = new State.Reference
+                            {
+                                reftype = State.Reference.RefType.API_Field,
+                                index = resource.id,
+                                datatype = compiler._assembly.FromCSharpType(resource.returnType)
+                            };
+                        }
+                        else if (resource.memberType == System.Reflection.MemberTypes.Property)
+                        {
+                            compiler._state.currentLRReference = new State.Reference
+                            {
+                                reftype = State.Reference.RefType.API_Prop,
+                                index = resource.id,
+                                datatype = compiler._assembly.FromCSharpType(resource.returnType)
+                            };
+                        }
+
                         compiler._state.currentDatatype = compiler._state.currentLRReference.datatype;
 
 
@@ -142,6 +165,39 @@ namespace CLX
                 return true;
             }
         }
+
+        protected class Compile_FunctionCall : CompilationStep
+        {
+            public Compile_FunctionCall(Compiler comp, CompilationStep next) : base(comp, next) { }
+
+            public override bool Execute()
+            {
+                next.Execute();
+                Debug.Log("Function Call:" + compiler.Peek());
+                while (compiler.MatchToken(Token.TokenType.ParenthOpen))
+                {
+                    Debug.Log("Found Parenth");
+                    compiler.Require(Token.TokenType.ParenthClose, ") Expected");
+                    if (compiler._state.currentLRReference == null)
+                    {
+                        // TODO
+                        // This is where the other parenthisis uses will go
+                        // Like casting and things like that 
+                    }
+                    else
+                    {
+                        if(!compiler._state.currentLRReference.isCallable)
+                        {
+                            throw new System.Exception($"The type {compiler._state.currentLRReference.datatype.name} is not callable");
+                        }
+                        Debug.Log("Collapsing callable");
+                        compiler._state.CollapseCurrentRef(ref compiler._ibuffer, State.CollapseType.Call);
+                    }
+                }
+                return true;
+            }
+        }
+
         /// <summary>
         /// Compile pre unary compilation step
         /// </summary>
@@ -160,7 +216,7 @@ namespace CLX
                     Token op = compiler.previous;
                     if (compiler._state.HasLRValueRef())
                     {
-                        compiler._state.CollapseCurrentRef(ref compiler._ibuffer, true);;
+                        compiler._state.CollapseCurrentRef(ref compiler._ibuffer, State.CollapseType.Read);
                     }
                     compiler._state.currentDatatype.GetPreUnaryInstructions(op.type, ref compiler._ibuffer);
 
@@ -277,13 +333,13 @@ namespace CLX
                     {
                         throw new System.Exception("Can only assign to an l-value");
                     }
-                    State.Reference lref = compiler._state.CollapseCurrentRef(ref compiler._ibuffer, false);
+                    State.Reference lref = compiler._state.CollapseCurrentRef(ref compiler._ibuffer, State.CollapseType.None);
 
                     compiler.Step_Expression.Execute();
 
                     if (compiler._state.HasLRValueRef())
                     {
-                        compiler._state.CollapseCurrentRef(ref compiler._ibuffer, true);
+                        compiler._state.CollapseCurrentRef(ref compiler._ibuffer, State.CollapseType.Read);
                     }
 
                     lref.GetStoreInstructions(ref compiler._ibuffer);
@@ -354,6 +410,7 @@ namespace CLX
         CompilationStep Step_StringLiteral;
         CompilationStep Step_Primitive;
         CompilationStep Step_Identifier;
+        CompilationStep Step_FunctionCall;
         CompilationStep Step_PreUnary;
         CompilationStep Step_PostUnary;
         CompilationStep Step_PowRoot;
@@ -372,7 +429,8 @@ namespace CLX
             Step_StringLiteral = new Compile_StringLiteral  (this, null);
             Step_Primitive = new Compile_Primitive          (this, Step_StringLiteral);
             Step_Identifier = new Compile_Identifier        (this, Step_Primitive);
-            Step_PreUnary = new Compile_PreUnary            (this, Step_Identifier);
+            Step_FunctionCall = new Compile_FunctionCall    (this, Step_Identifier);
+            Step_PreUnary = new Compile_PreUnary            (this, Step_FunctionCall);
             Step_PostUnary = new Compile_PostUnary          (this, Step_PreUnary);
             Step_PowRoot = new BinaryOpCompilationStep      (this, Step_PostUnary,  "PowRoot", Token.TokenType.Power);
             Step_MulDiv = new BinaryOpCompilationStep       (this, Step_PowRoot,    "MulDiv", Token.TokenType.Multiply, Token.TokenType.Divide);
@@ -436,7 +494,7 @@ namespace CLX
 
                 if (_state.HasLRValueRef())
                 {
-                    _state.CollapseCurrentRef(ref _ibuffer, true);
+                    _state.CollapseCurrentRef(ref _ibuffer, State.CollapseType.Read);
                 }
                 InstructionBuffer.Node branchNode = _ibuffer.Add(OpCode.BrchFalse, 0);
                 Require(Token.TokenType.EOS, "; Required");
@@ -473,7 +531,7 @@ namespace CLX
 
                 if(_state.HasLRValueRef())
                 {
-                    _state.CollapseCurrentRef(ref _ibuffer, true);
+                    _state.CollapseCurrentRef(ref _ibuffer, State.CollapseType.Read);
                 }
                 InstructionBuffer.Node branchNode = _ibuffer.Add(OpCode.BrchFalse, 0);
                 CompileStatement();
@@ -519,7 +577,7 @@ namespace CLX
                 CompileStatement();
                 if (_state.HasLRValueRef())
                 {
-                    _state.CollapseCurrentRef(ref _ibuffer, true);
+                    _state.CollapseCurrentRef(ref _ibuffer, State.CollapseType.Read);
                 }
                 _state.currentDatatype.GetPrintInstructions(ref _ibuffer);
                 return true;

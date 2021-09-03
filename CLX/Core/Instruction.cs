@@ -54,7 +54,7 @@ namespace CLX
         Sub_i32, Sub_f32,
         Mul_i32, Mul_f32,
         Div_i32, Div_f32,
-        Pow_f32,
+        Pow_i32, Pow_f32,
         Mod_i32, Mod_f32,
         Inc_i32,
         Dec_i32,

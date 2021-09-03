@@ -114,6 +114,79 @@ namespace CLX
             return apicalls.ToArray();
         }
 
+        public Program.Resource GenerateResource(string name)
+        {
+            List<API_CALL> apicalls = new List<API_CALL>();
+            MemberInfo[] memberInfo = targetType.GetMember(name);
+            Program.Resource resource = null;
+
+
+            // If no members found
+            if(memberInfo.Length < 1)
+            {
+                return null;
+            }
+
+            if (memberInfo[0].MemberType == MemberTypes.Field)
+            {
+                FieldInfo field = (FieldInfo)memberInfo[0];
+                resource = new Program.Resource
+                {
+                    name = field.Name,
+                    func = Field(name),
+                    memberType = MemberTypes.Field,
+                    returnType = field.FieldType
+                };
+            }
+            else if (memberInfo[0].MemberType == MemberTypes.Property)
+            {
+                PropertyInfo prop = (PropertyInfo)memberInfo[0];
+                apicalls.AddRange(Property(name));
+                resource = new Program.Resource
+                {
+                    name = prop.Name,
+                    func = Property(name),
+                    memberType = MemberTypes.Property,
+                    returnType = prop.PropertyType
+                };
+            }
+            else if (memberInfo[0].MemberType == MemberTypes.Method)
+            {
+                MethodInfo method = (MethodInfo)memberInfo[0];
+                int maxArgCount = 0;
+                foreach(var methodInfo in memberInfo)
+                {
+                    ParameterInfo[] parameters = method.GetParameters();
+                    System.Type[] args = new System.Type[parameters.Length];
+                    if (parameters.Length > maxArgCount)
+                    {
+                        maxArgCount = parameters.Length;
+                    }
+                    for (int i = 0; i < parameters.Length; ++i)
+                    {
+                        args[i] = parameters[i].ParameterType;
+                    }
+                    apicalls.AddRange(Method(name));
+                }
+                resource = new Program.Resource
+                {
+                    name = method.Name,
+                    func = apicalls.ToArray(),
+                    memberType = MemberTypes.Method,
+                    returnType = method.ReturnType,
+                    args = new object[maxArgCount]
+                };
+            }
+            else
+            {
+                throw new System.Exception($"The member {name} was not found in the class {targetType.FullName}");
+            }
+
+            
+            return resource;
+
+        }
+
 
 
     }

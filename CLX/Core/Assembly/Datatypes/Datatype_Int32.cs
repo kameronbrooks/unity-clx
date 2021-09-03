@@ -46,6 +46,14 @@ namespace CLX
                         return this;
                     }
                     break;
+                case Token.TokenType.Power:
+                    if (rtype == this)
+                    {
+                        buffer.Add(OpCode.Pow_i32);
+
+                        return this;
+                    }
+                    break;
                 case Token.TokenType.Modulo:
                     if (rtype == this)
                     {

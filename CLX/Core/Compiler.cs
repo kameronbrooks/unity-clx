@@ -14,7 +14,7 @@ namespace CLX
         {
             public class Reference
             {
-                public enum RefType { Local, Arg, Reg, Elem, API }
+                public enum RefType { Local, Arg, Reg, Elem, API_Field, API_Prop, API_Method }
                 public RefType reftype;
                 public Datatype datatype;
                 public int offset;
@@ -29,7 +29,8 @@ namespace CLX
                         case RefType.Reg:
                             datatype.GetStoreInstructions(ref buffer, this);
                             break;
-                        case RefType.API:
+                        case RefType.API_Field:
+                        case RefType.API_Prop:
                             buffer.Add(OpCode.Call_API_Set, index);
                             break;
                         default:
@@ -44,13 +45,33 @@ namespace CLX
                         case RefType.Reg:
                             datatype.GetLoadInstructions(ref buffer, this);
                             break;
-                        case RefType.API:
+                        case RefType.API_Field:
+                        case RefType.API_Prop:
                             buffer.Add(OpCode.Call_API_Get, index);
+                            break;
+                        case RefType.API_Method:
+                            buffer.Add(OpCode.LdC_i32, index);
                             break;
                         default:
                             throw new Exception($"Trying to collapse unsupported reference type {reftype}");
                     }
                     
+                }
+
+                public void GetCallInstructions(ref InstructionBuffer buffer)
+                {
+                    switch (reftype)
+                    {
+                        case RefType.Local:
+                        case RefType.Reg:
+                            datatype.GetLoadInstructions(ref buffer, this);
+                            break;
+                        case RefType.API_Method:
+                            buffer.Add(OpCode.Call_API_FUNC_0, index);
+                            break;
+                        default:
+                            throw new Exception($"Trying to collapse unsupported reference type {reftype}");
+                    }
                 }
             }
             public class Substate
@@ -180,19 +201,24 @@ namespace CLX
                 _frames.Peek().lvalueReference = null;
             }
 
+            public enum CollapseType { None = 0, Read = 1, Call = 2}
             /// <summary>
             /// Collapses the current lr value into an r (read) or removes it
             /// </summary>
             /// <param name="buffer"></param>
             /// <param name="read"></param>
             /// <returns></returns>
-            public Reference CollapseCurrentRef(ref InstructionBuffer buffer, bool read = true)
+            public Reference CollapseCurrentRef(ref InstructionBuffer buffer, CollapseType accessType = CollapseType.None)
             {
                 Reference output = _frames.Peek().lvalueReference;
-                if(read)
+                if(accessType == CollapseType.Read)
                 {
                     output.GetLoadInstructions(ref buffer);
-                }              
+                }
+                else if (accessType == CollapseType.Call)
+                {
+                    output.GetCallInstructions(ref buffer);
+                }
                 _frames.Peek().lvalueReference = null;
                 return output;
             }
