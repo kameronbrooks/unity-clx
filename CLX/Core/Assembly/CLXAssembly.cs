@@ -48,12 +48,12 @@ namespace CLX
 
             public IAssemblyElement GetElement(string qualifiedName)
             {
-                if(qualifiedName.Contains("."))
+                if (qualifiedName.Contains("."))
                 {
                     int pivot = qualifiedName.IndexOf('.');
                     string subNamespaceName = qualifiedName.Substring(0, pivot);
                     IAssemblyElement subNamespace;
-                    if(_map.TryGetValue(subNamespaceName, out subNamespace))
+                    if (_map.TryGetValue(subNamespaceName, out subNamespace))
                     {
                         if (subNamespace.elementType != AssemblyElementType.Namespace)
                         {
@@ -71,7 +71,7 @@ namespace CLX
                         {
                             throw new System.Exception($"{qualifiedName} was not found");
                         }
-                        
+
                     }
                 }
                 else
@@ -115,7 +115,7 @@ namespace CLX
                     // If not found in the map check the parent if one exists
                     else
                     {
-                        if(parent != null)
+                        if (parent != null)
                         {
                             return parent.TryGetElement(qualifiedName, out element);
                         }
@@ -123,7 +123,7 @@ namespace CLX
                         {
                             return false;
                         }
-                        
+
                     }
                 }
                 else
@@ -173,12 +173,36 @@ namespace CLX
                 get
                 {
                     IAssemblyElement elem;
-                    if(TryGetElement(name, out elem))
+                    if (TryGetElement(name, out elem))
                     {
                         return elem;
                     }
                     return null;
                 }
+            }
+
+            public string[] ListDataTypes()
+            {
+                List<string> names = new List<string>();
+                foreach (var key in _map.Keys)
+                {
+                    names.Add(key);
+                }
+                return names.ToArray();
+            }
+
+            public override string ToString()
+            {
+                System.Text.StringBuilder sb = new System.Text.StringBuilder();
+                sb.Append(_name + "\n");
+                string[] datatypes = ListDataTypes();
+
+                foreach(var dt in datatypes)
+                {
+                    sb.Append($"-\t{dt}\n");
+                }
+                return sb.ToString();
+
             }
         }
 
@@ -205,7 +229,8 @@ namespace CLX
         }
         Namespace _global;
         public Datatypes datatypes;
-        
+
+
 
         public Namespace global
         {
@@ -241,6 +266,7 @@ namespace CLX
             IAssemblyElement elem;
             if(TryGetElement(name, out elem))
             {
+                Debug.Log($"{name} was not found in the Assmbly");
                 if(elem.elementType == AssemblyElementType.Datatype)
                 {
                     dt = (Datatype)elem;
@@ -316,12 +342,15 @@ namespace CLX
             else
             {
 
-                string name = $"object_{type.FullName}";
+                string name = $"object_{type.Name}";
                 Datatype dt = null;
-                if(!TryGetDatatype(name, out dt))
+                Debug.Log($"Adding datatype to assembly {name}");
+                Debug.Log(_global);
+                if (!TryGetDatatype(name, out dt))
                 {
                     dt = new Datatype_Object(this, type);
                     _global.AddDatatype(dt, name);
+                    
                 }
                 return dt;
             }

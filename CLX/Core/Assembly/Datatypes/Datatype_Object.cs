@@ -14,6 +14,14 @@ namespace CLX
             _name = $"object_{cstype.FullName}";
         }
 
+        public System.Type CSharpType
+        {
+            get
+            {
+                return _csType;
+            }
+        }
+
         public override Datatype GetBinaryOpInstructions(Token.TokenType opType, Datatype rtype, ref InstructionBuffer buffer)
         {
             return this;

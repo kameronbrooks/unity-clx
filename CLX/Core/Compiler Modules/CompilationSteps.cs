@@ -35,8 +35,9 @@ namespace CLX
             }
             public override bool Execute()
             {
-                Debug.Log(name + ":" + compiler.Peek());
+                
                 next.Execute();
+                Debug.Log(name + ":" + compiler.Peek());
                 Datatype ltype = compiler._state.currentDatatype;
                 while (!compiler.IsEOF() && compiler.MatchToken(matchingTokenTypes))
                 {
@@ -191,7 +192,9 @@ namespace CLX
                             throw new System.Exception($"The type {compiler._state.currentLRReference.datatype.name} is not callable");
                         }
                         Debug.Log("Collapsing callable");
+                        compiler._state.currentDatatype = compiler._assembly.FromCSharpType((((Datatype_Object)(compiler._state.currentLRReference.datatype)).CSharpType.GetGenericArguments()[0]));
                         compiler._state.CollapseCurrentRef(ref compiler._ibuffer, State.CollapseType.Call);
+                        
                     }
                 }
                 return true;
@@ -234,8 +237,9 @@ namespace CLX
 
             public override bool Execute()
             {
-                Debug.Log("PostUnary:" + compiler.Peek());
+                
                 next.Execute();
+                Debug.Log("PostUnary:" + compiler.Peek());
                 return true;
             }
         }
